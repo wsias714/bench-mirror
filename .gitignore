@@ -1,0 +1,10 @@
+node_modules/
+dist/
+.local/
+.claude/
+.idea/
+.vscode/
+*.log
+# Real snapshots are private data. They live only in Dropbox, never in git.
+snapshot*.json
+.env

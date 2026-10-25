@@ -3,18 +3,30 @@
 export interface Ev { id: string; title: string; domain: string; due: string; days: number | null; bucket: string }
 export interface Card { id: string; kind: string; title: string; domain: string; outcome: string; created: string }
 export interface Thread { title: string; project: string; status: string; needs_you: boolean }
+export interface TlItem { id: string; title: string; domain: string; due: string; days: number | null; lead: number }
+export interface Timeline { days: number; ahead: TlItem[]; overdue: TlItem[]; overdue_total: number }
+export interface HistoryRow { ts: string; ok: boolean | null; moved: number | null; plan_only: boolean; ended: string; mins: number | null; calls: number | null; cost: number | null }
 export interface Twm {
   available: boolean; as_of?: string; running?: boolean; paused?: boolean;
-  last_run?: { ts: string; ok: boolean | null; ended: string }; next_run?: string;
-  digest?: { title: string; health: string; moved: string[] };
+  failures?: { consecutive: number | null; stop_after: number | null }; builds?: boolean; model?: string;
+  last_run?: { ts: string; ok: boolean | null; moved?: number | null; ended: string }; next_run?: string;
+  digest?: { title: string; health: string; moved: string[]; by_role?: Record<string, string[]>; next?: string[]; notices?: string[] };
   weekly_verdict?: string;
+  plan?: { updated: string; goal: string; standing: string[] };
+  history?: HistoryRow[];
+  health?: {
+    green: boolean | null; tier: string; head: string; at: string; first_failure: string;
+    checks: { id: string; status: string }[]; phase: { current: number | null; total: number | null; pct: number | null; title: string };
+    probes_red: number; probes_total: number | null; pivots: number | null; unmerged: { headline: string; date: string }[];
+  };
   decisions_waiting?: { id: string; q: string; due: string }[];
+  decisions_recent?: { id: string; status: string; q: string }[];
   decisions_council?: string[];
 }
 export interface Snapshot {
   schema: number; generated_at: string; stale_after_min: number; read_only: boolean;
   today: { counts: { overdue: number; upcoming: number; active: number }; top: Ev[]; outstanding: Ev[] };
-  deck: Card[]; week: Ev[]; twm: Twm;
+  deck: Card[]; week: Ev[]; timeline?: Timeline; twm: Twm;
   threads: { as_of: string; error: string; needs_you: number; items: Thread[] };
   inbox: { dir: string; accepts: string[]; applied: string[] };
 }

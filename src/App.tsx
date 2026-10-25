@@ -8,9 +8,11 @@ import {
 import { loadCached, saveCached } from "./lib/store.ts";
 import { agoLabel, ageMinutes, dueLabel, parseSnapshot, pill } from "./lib/snapshot.ts";
 import type { Card, Ev, Snapshot, Thread } from "./lib/snapshot.ts";
+import Timeline from "./Timeline.tsx";
+import TwmView from "./Twm.tsx";
 
-type Tab = "today" | "deck" | "week" | "twm" | "threads";
-const TABS: [Tab, string][] = [["today", "Today"], ["deck", "Deck"], ["week", "Week"], ["twm", "TWM"], ["threads", "Threads"]];
+type Tab = "today" | "deck" | "week" | "timeline" | "twm" | "threads";
+const TABS: [Tab, string][] = [["today", "Today"], ["deck", "Deck"], ["week", "Week"], ["timeline", "Timeline"], ["twm", "TWM"], ["threads", "Threads"]];
 
 const readCached = (): Snapshot | null => {
   const t = loadCached();
@@ -59,6 +61,7 @@ function Body({ tab, s }: { tab: Tab; s: Snapshot }) {
   }
   if (tab === "deck") return s.deck.length ? <>{s.deck.map((c) => <CardRow key={c.id} c={c} />)}</> : <Empty text="Deck is clear." />;
   if (tab === "week") return s.week.length ? <>{s.week.map((e) => <EventRow key={e.id} e={e} />)}</> : <Empty text="No deadlines in the next 7 days." />;
+  if (tab === "timeline") return s.timeline ? <Timeline tl={s.timeline} /> : <Empty text="Timeline arrives with the next Bench update (within 15 minutes)." />;
   if (tab === "threads") {
     return (
       <>
@@ -68,26 +71,7 @@ function Body({ tab, s }: { tab: Tab; s: Snapshot }) {
       </>
     );
   }
-  const t = s.twm;
-  if (!t.available) return <Empty text="TWM data isn't available." />;
-  return (
-    <>
-      <div className="card">
-        <div className="t">Weekly report: {t.weekly_verdict || "no verdict yet"}</div>
-        <div className="meta">{t.running ? "A cycle is running" : t.paused ? "Paused" : "Idle"} · next {t.next_run || "unknown"}</div>
-        {t.last_run && <div className="meta">Last run {t.last_run.ts}: <span className={t.last_run.ok ? "" : "bad"}>{t.last_run.ended || (t.last_run.ok ? "ok" : "failed")}</span></div>}
-      </div>
-      <h2>Decisions waiting</h2>
-      {t.decisions_waiting?.length ? t.decisions_waiting.map((d) => <div className="card" key={d.id}><div className="t">{d.id} · due {d.due}</div><div className="meta">{d.q}</div></div>) : null}
-      {t.decisions_council?.length ? t.decisions_council.map((d, i) => <div className="card" key={i}><div className="meta">{d}</div></div>) : null}
-      {!t.decisions_waiting?.length && !t.decisions_council?.length && <Empty text="Nothing waiting on you." />}
-      <h2>{t.digest?.title || "Latest digest"}</h2>
-      <div className="card">
-        {t.digest?.health && <div className="meta"><b>Health:</b> {t.digest.health}</div>}
-        {t.digest?.moved?.map((m, i) => <div className="meta" key={i}>• {m}</div>)}
-      </div>
-    </>
-  );
+  return <TwmView t={s.twm} />;
 }
 
 export default function App() {
@@ -155,7 +139,7 @@ export default function App() {
       <nav className="tabs" role="tablist">
         {TABS.map(([k, label]) => (
           <button key={k} role="tab" aria-selected={tab === k} className={tab === k ? "on" : ""} onClick={() => pick(k)}>
-            {label}{k === "threads" && snap && snap.threads.needs_you ? ` (${snap.threads.needs_you})` : ""}
+            {label}{k === "threads" && snap && snap.threads.needs_you ? <sup>{snap.threads.needs_you}</sup> : null}
           </button>
         ))}
       </nav>

@@ -24,7 +24,9 @@ input { font: inherit; font-size: 16px; width: 100%; min-height: 44px; padding: 
 .dot { width: 9px; height: 9px; border-radius: 50%; background: var(--muted); }
 .pill.ok .dot { background: var(--ok); } .pill.stale .dot, .pill.offline .dot, .pill.syncing .dot { background: var(--warn); } .pill.error .dot { background: var(--bad); }
 .tabs { display: flex; gap: 6px; margin: 14px 0 6px; overflow-x: auto; }
-.tabs button { flex: 1 1 0; padding: 0 6px; font-size: 15px; }
+.tabs { gap: 4px; margin-left: -4px; margin-right: -4px; }
+.tabs button { flex: 1 1 auto; padding: 0 7px; font-size: 13.5px; white-space: nowrap; }
+.tabs sup { font-size: 10px; margin-left: 2px; color: var(--warn); font-weight: 700; }
 .tabs button.on { background: var(--navy); color: var(--bg); border-color: var(--navy); font-weight: 600; }
 .card { background: var(--card); border: 1px solid var(--line); border-radius: var(--radius); padding: 12px 14px; margin: 0 0 8px; overflow-wrap: anywhere; }
 .card.need { border-left: 5px solid var(--warn); background: var(--need); }
@@ -39,3 +41,33 @@ input { font: inherit; font-size: 16px; width: 100%; min-height: 44px; padding: 
 .sheet h2 { margin: 0; font: 700 20px Georgia, serif; text-transform: none; letter-spacing: 0; color: var(--ink); }
 .field { display: block; font-size: 14px; color: var(--muted); }
 button.danger { color: var(--bad); border-color: var(--bad); }
+
+/* timeline */
+:root { --d-ncpt:#6A45BE; --d-awt:#276749; --d-nanny:#97266D; --d-personal:#2B6CB0; --d-house:#9C4221; --d-homeschool:#22543D; --d-admin:#4A5568; --d-other:#667085; }
+@media (prefers-color-scheme: dark) { :root { --d-ncpt:#A78BE8; --d-awt:#6FB891; --d-nanny:#DE8AB6; --d-personal:#7FB0E0; --d-house:#D89268; --d-homeschool:#7FC4A0; --d-admin:#A0AEC0; --d-other:#9aa3b2; } }
+.tl-grid { display: grid; gap: 1px; margin: 10px -8px 0; align-items: stretch; }  /* bleeds 8px so 8 columns stay 44px wide */
+.tl-h { font-size: 11px; color: var(--muted); text-align: center; align-self: end; line-height: 1.1; }
+.tl-dom { display: flex; align-items: center; font-size: 12px; min-height: 44px; padding-left: 8px; overflow: hidden; }
+.tl-sw { width: 10px; height: 10px; border-radius: 3px; background: var(--muted); flex: none; display: inline-block; }
+.tl-sw.late { background: var(--bad); } .tl-sw.dom { background: currentColor; }
+.tl-cell { padding: 0; min-width: 0; min-height: 44px; font-weight: 700; font-size: 14px; border: 1px solid var(--line); background: var(--card); color: var(--ink); }
+.tl-cell:disabled { opacity: 1 !important; background: transparent; border-style: dashed; color: transparent; }
+.tl-cell:not(:disabled) { color: #fff; border-color: transparent; background: var(--d-other); }
+.tl-cell.late:not(:disabled) { background: var(--bad); }
+.tl-cell.on { outline: 3px solid var(--warn); outline-offset: 1px; }
+[data-domain=ncpt] { --c: var(--d-ncpt) } [data-domain=awt] { --c: var(--d-awt) } [data-domain=nanny] { --c: var(--d-nanny) } [data-domain=personal] { --c: var(--d-personal) }
+[data-domain=house] { --c: var(--d-house) } [data-domain=homeschool] { --c: var(--d-homeschool) } [data-domain=admin] { --c: var(--d-admin) } [data-domain=other] { --c: var(--d-other) }
+.tl-cell:not(:disabled):not(.late) { background: var(--c, var(--d-other)); }
+.tl-dom { color: var(--c, var(--ink)); } .tl-dom { font-weight: 600; }
+.tl-item { border-left: 5px solid var(--c, var(--line)); }
+.tl-key { font-size: 12px; color: var(--muted); margin-top: 8px; display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+.tl-week { font-size: 13px; font-weight: 700; color: var(--navy); margin: 14px 0 6px; }
+.link { background: none; border: none; color: var(--accent); text-decoration: underline; min-height: 44px; padding: 0 4px; }
+/* TWM */
+.grid3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin: 10px 0 6px; text-align: center; }
+.grid3 b { display: block; font-size: 16px; } .grid3 span { color: var(--muted); font-size: 12px; }
+.twm-list { margin: 4px 0 8px; padding-left: 18px; } .twm-list li { margin: 4px 0; font-size: 14px; }
+.eyebrow { font-size: 12px; letter-spacing: .06em; text-transform: uppercase; color: var(--muted); margin: 10px 0 2px; }
+.ok { color: var(--ok); } .chip.ok { border-color: var(--ok); } .chip.bad { border-color: var(--bad); } .checks { margin-top: 8px; }
+details.more summary { min-height: 44px; display: flex; align-items: center; color: var(--muted); }
+.note { color: var(--muted); font-size: 13px; }

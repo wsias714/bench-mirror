@@ -23,9 +23,9 @@ input { font: inherit; font-size: 16px; width: 100%; min-height: 44px; padding: 
 .pill { display: inline-flex; align-items: center; gap: 6px; font-size: 13px; border-radius: 999px; white-space: nowrap; }
 .dot { width: 9px; height: 9px; border-radius: 50%; background: var(--muted); }
 .pill.ok .dot { background: var(--ok); } .pill.stale .dot, .pill.offline .dot, .pill.syncing .dot { background: var(--warn); } .pill.error .dot { background: var(--bad); }
-.tabs { display: flex; gap: 6px; margin: 14px 0 6px; overflow-x: auto; }
+.tabs { display: flex; flex-wrap: wrap; gap: 6px; margin: 14px 0 6px; }  /* 7 tabs wrap to two rows instead of clipping */
 .tabs { gap: 4px; margin-left: -4px; margin-right: -4px; }
-.tabs button { flex: 1 1 auto; padding: 0 7px; font-size: 13.5px; white-space: nowrap; }
+.tabs button { flex: 1 1 22%; padding: 0 7px; font-size: 13.5px; white-space: nowrap; }
 .tabs sup { font-size: 10px; margin-left: 2px; color: var(--warn); font-weight: 700; }
 .tabs button.on { background: var(--navy); color: var(--bg); border-color: var(--navy); font-weight: 600; }
 .card { background: var(--card); border: 1px solid var(--line); border-radius: var(--radius); padding: 12px 14px; margin: 0 0 8px; overflow-wrap: anywhere; }
@@ -71,3 +71,17 @@ button.danger { color: var(--bad); border-color: var(--bad); }
 .ok { color: var(--ok); } .chip.ok { border-color: var(--ok); } .chip.bad { border-color: var(--bad); } .checks { margin-top: 8px; }
 details.more summary { min-height: 44px; display: flex; align-items: center; color: var(--muted); }
 .note { color: var(--muted); font-size: 13px; }
+/* School */
+.hs-row { margin: 0 0 14px; } .hs-top { display: flex; justify-content: space-between; font-weight: 600; font-size: 15px; }
+.hs-pace { font-size: 12px; font-weight: 700; } .hs-pace.ahead, .hs-pace.on { color: var(--ok); } .hs-pace.behind { color: var(--warn); } .hs-pace.far { color: var(--bad); }
+.hs-track { position: relative; height: 12px; border-radius: 6px; background: var(--line); margin: 6px 0 4px; overflow: hidden; }
+.hs-track i { position: absolute; top: 0; bottom: 0; display: block; }
+.hs-done { left: 0; background: var(--accent); } .hs-plan { background: repeating-linear-gradient(45deg, var(--accent) 0 3px, transparent 3px 6px); opacity: .45; }
+.hs-tick { width: 3px; background: var(--ink); margin-left: -1px; }
+.hs-key { display: inline-block; width: 12px; height: 8px; border-radius: 2px; } .hs-key.done { background: var(--accent); } .hs-key.plan { background: var(--accent); opacity: .45; } .hs-key.tick { width: 3px; height: 12px; background: var(--ink); }
+.sync .dot { display: inline-block; margin-right: 6px; } .sync.ok .dot { background: var(--ok); } .sync.stale .dot { background: var(--warn); } .sync.bad { color: var(--bad); } .sync.bad .dot { background: var(--bad); }
+.hs-days { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; margin: 0 0 6px; }
+.hs-day { background: var(--card); border: 1px solid var(--line); border-radius: 10px; min-height: 64px; padding: 6px 2px; text-align: center; font-size: 12px; display: flex; flex-direction: column; align-items: center; gap: 2px; }
+.hs-day b { font-size: 12px; } .hs-day span { font-size: 15px; font-weight: 700; } .hs-day.pend { border-color: var(--warn); background: var(--need); }
+.dot.ws { background: var(--accent); }
+.bad { color: var(--bad); }

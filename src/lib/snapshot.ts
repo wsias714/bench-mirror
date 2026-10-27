@@ -23,10 +23,21 @@ export interface Twm {
   decisions_recent?: { id: string; status: string; q: string }[];
   decisions_council?: string[];
 }
+export interface HsSubject { subject: string; logged: number; scheduled: number; target: number; expected: number }
+export interface HsDay { date: string; weekday: string; total: number; confirmed: number; pending: number; minutes: number; work_sample: boolean }
+export interface Homeschool {
+  available: boolean;
+  lp?: { label: string; start: string; end: string; elapsed_days: number; total_days: number } | null;
+  lp_subjects?: HsSubject[];
+  work_samples?: { required: number; have: number; by_subject: { subject: string; n: number }[] };
+  drive?: { files: number; linked: number; unmatched: number; undated: number; listing_age_min: number | null; by_subject: { subject: string; files: number; unmatched: number }[] } | null;
+  week?: { start: string; end: string; pct: number; pending: number; subjects: HsSubject[]; days: HsDay[] };
+  sync?: { last_ingest_at: string | null; last_attempt_at: string | null; added: number; ok: boolean; skipped: string | null };
+}
 export interface Snapshot {
   schema: number; generated_at: string; stale_after_min: number; read_only: boolean;
   today: { counts: { overdue: number; upcoming: number; active: number }; top: Ev[]; outstanding: Ev[] };
-  deck: Card[]; week: Ev[]; timeline?: Timeline; twm: Twm;
+  deck: Card[]; week: Ev[]; timeline?: Timeline; twm: Twm; homeschool?: Homeschool;
   threads: { as_of: string; error: string; needs_you: number; items: Thread[] };
   inbox: { dir: string; accepts: string[]; applied: string[] };
 }

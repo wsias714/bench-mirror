@@ -9,10 +9,11 @@ import { loadCached, saveCached } from "./lib/store.ts";
 import { agoLabel, ageMinutes, dueLabel, parseSnapshot, pill } from "./lib/snapshot.ts";
 import type { Card, Ev, Snapshot, Thread } from "./lib/snapshot.ts";
 import Timeline from "./Timeline.tsx";
+import HomeschoolView from "./Homeschool.tsx";
 import TwmView from "./Twm.tsx";
 
-type Tab = "today" | "deck" | "week" | "timeline" | "twm" | "threads";
-const TABS: [Tab, string][] = [["today", "Today"], ["deck", "Deck"], ["week", "Week"], ["timeline", "Timeline"], ["twm", "TWM"], ["threads", "Threads"]];
+type Tab = "today" | "deck" | "week" | "timeline" | "school" | "twm" | "threads";
+const TABS: [Tab, string][] = [["today", "Today"], ["deck", "Deck"], ["week", "Week"], ["timeline", "Timeline"], ["school", "School"], ["twm", "TWM"], ["threads", "Threads"]];
 
 const readCached = (): Snapshot | null => {
   const t = loadCached();
@@ -62,6 +63,7 @@ function Body({ tab, s }: { tab: Tab; s: Snapshot }) {
   if (tab === "deck") return s.deck.length ? <>{s.deck.map((c) => <CardRow key={c.id} c={c} />)}</> : <Empty text="Deck is clear." />;
   if (tab === "week") return s.week.length ? <>{s.week.map((e) => <EventRow key={e.id} e={e} />)}</> : <Empty text="No deadlines in the next 7 days." />;
   if (tab === "timeline") return s.timeline ? <Timeline tl={s.timeline} /> : <Empty text="Timeline arrives with the next Bench update (within 15 minutes)." />;
+  if (tab === "school") return <HomeschoolView h={s.homeschool} />;
   if (tab === "threads") {
     return (
       <>

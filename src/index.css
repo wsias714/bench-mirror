@@ -85,3 +85,13 @@ details.more summary { min-height: 44px; display: flex; align-items: center; col
 .hs-day b { font-size: 12px; } .hs-day span { font-size: 15px; font-weight: 700; } .hs-day.pend { border-color: var(--warn); background: var(--need); }
 .dot.ws { background: var(--accent); }
 .bad { color: var(--bad); }
+
+.hs-filters { display: flex; flex-wrap: wrap; gap: 6px; margin: 0 0 8px; }
+.hs-filters button { flex: 1 1 22%; min-height: 44px; border: 1px solid var(--line); border-radius: 10px; background: var(--card); color: inherit; font-size: 13px; }
+.hs-filters button.on { border-color: var(--accent); color: var(--accent); font-weight: 700; }
+.hs-rec { border-top: 1px solid var(--line); } .hs-rec:first-child { border-top: none; }
+.hs-rec-head { display: grid; grid-template-columns: 44px 1fr auto auto; gap: 8px; align-items: center; width: 100%; min-height: 44px; background: none; border: none; color: inherit; text-align: left; padding: 0; font-size: 14px; }
+.hs-rec-date { font-variant-numeric: tabular-nums; opacity: .7; } .hs-rec-min { opacity: .7; font-size: 13px; }
+.hs-badge { font-size: 11px; padding: 2px 8px; border-radius: 999px; border: 1px solid var(--line); }
+.hs-badge.pending { border-color: var(--warn); background: var(--need); } .hs-badge.upcoming { opacity: .7; }
+.hs-rec-body { padding: 0 0 10px 52px; font-size: 14px; }

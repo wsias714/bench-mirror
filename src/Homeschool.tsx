@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { agoLabel } from "./lib/snapshot.ts";
-import type { Homeschool, HsSubject } from "./lib/snapshot.ts";
+import type { Homeschool, HsRecord, HsSubject } from "./lib/snapshot.ts";
 import { PACE_TEXT, bar, hours, pace, syncState } from "./lib/homeschool.ts";
 
 const SHORT: Record<string, string> = { "Language Arts": "Lang. Arts", "Social Studies": "Soc. Studies", "Physical Education": "P.E.", "Social-Emotional": "Soc-Emo" };
@@ -22,9 +22,34 @@ function Subject({ r }: { r: HsSubject }) {
   );
 }
 
-/** The desktop Homeschool tab, phone-sized and counts-only: no names, titles or file names ever reach this view. */
+const FILTERS = [["all", "All"], ["pending", "To confirm"], ["confirmed", "Confirmed"], ["upcoming", "Upcoming"]] as const;
+type Filter = (typeof FILTERS)[number][0];
+const inFilter = (r: HsRecord, f: Filter) => f === "all" || (f === "upcoming" ? r.future : f === "pending" ? r.status === "pending" && !r.future : r.status === f);
+
+function Record({ r }: { r: HsRecord }) {
+  const [open, setOpen] = useState(false);
+  const kind = r.future ? "upcoming" : r.status;
+  return (
+    <div className="hs-rec">
+      <button className="hs-rec-head" onClick={() => setOpen(!open)} aria-expanded={open}>
+        <span className="hs-rec-date">{md(r.date)}</span>
+        <span className="hs-rec-type">{r.type || "Entry"}</span>
+        <span className="hs-rec-min">{r.minutes} min</span>
+        <span className={`hs-badge ${kind}`}>{kind}</span>
+      </button>
+      {open && <div className="hs-rec-body">
+        {r.text && <div>{r.text}</div>}
+        <div className="meta">{r.subjects.map(short).join(" · ") || "No subject"}{r.program ? ` · ${r.program}` : ""}</div>
+        <div className="meta">{r.date}{r.work_sample ? " · work sample" : ""}{r.has_file ? " · file attached" : ""}</div>
+      </div>}
+    </div>
+  );
+}
+
+/** The desktop Homeschool tab, phone-sized and no child names or file names reach this view; entry text is masked by Bench before it is published. */
 export default function HomeschoolView({ h }: { h?: Homeschool }) {
   const [wk, setWk] = useState(false);
+  const [filter, setFilter] = useState<Filter>("all");
   if (!h) return <div className="empty">School arrives with the next Bench update (within 15 minutes).</div>;
   if (!h.available) return <div className="empty">Homeschool data isn't available right now.</div>;
   const lp = h.lp, ws = h.work_samples, d = h.drive, w = h.week;
@@ -68,6 +93,20 @@ export default function HomeschoolView({ h }: { h?: Homeschool }) {
           <div className="meta">Drive listing {d.listing_age_min == null ? "age unknown" : agoLabel(d.listing_age_min)}. Unmatched files are waiting for a worksheet entry on the same day and subject.</div>
         </> : <div className="meta">Drive mapping isn't available.</div>}
       </div>
+
+      {h.records && <>
+        <h2>All entries this period · {h.records.total}</h2>
+        <div className="hs-filters" role="group" aria-label="Filter entries">
+          {FILTERS.map(([k, label]) => <button key={k} className={filter === k ? "on" : ""} aria-pressed={filter === k} onClick={() => setFilter(k)}>{label}</button>)}
+        </div>
+        <div className="card">
+          {(() => {
+            const rows = h.records!.rows.filter((r) => inFilter(r, filter));
+            return rows.length ? rows.map((r, i) => <Record key={`${r.date}-${i}`} r={r} />) : <div className="meta">Nothing in this view.</div>;
+          })()}
+          {h.records.total > h.records.rows.length ? <div className="meta">Showing the newest {h.records.rows.length} of {h.records.total}.</div> : null}
+        </div>
+      </>}
 
       {w && <>
         <h2>This week · {md(w.start)} – {md(w.end)}</h2>

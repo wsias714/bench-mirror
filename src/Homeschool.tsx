@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { agoLabel } from "./lib/snapshot.ts";
-import type { Homeschool, HsRecord, HsSubject } from "./lib/snapshot.ts";
+import type { Homeschool, HsRecord, HsSubject, LpReport } from "./lib/snapshot.ts";
 import { PACE_TEXT, bar, hours, pace, syncState } from "./lib/homeschool.ts";
 
 const SHORT: Record<string, string> = { "Language Arts": "Lang. Arts", "Social Studies": "Soc. Studies", "Physical Education": "P.E.", "Social-Emotional": "Soc-Emo" };
@@ -43,6 +43,53 @@ function Record({ r }: { r: HsRecord }) {
         <div className="meta">{r.date}{r.work_sample ? " · work sample" : ""}{r.has_file ? " · file attached" : ""}</div>
       </div>}
     </div>
+  );
+}
+
+const pct = (a: number, b: number) => (b ? Math.min(100, Math.round((100 * a) / b)) : 0);
+
+/** The school-facing LP report, phone-sized: what Suncoast gets, per student, with names masked by Bench. */
+function LpReportView({ r }: { r: LpReport }) {
+  const [i, setI] = useState(0);
+  const [log, setLog] = useState(false);
+  const st = r.students[Math.min(i, r.students.length - 1)];
+  if (!st) return null;
+  return (
+    <>
+      <h2>{r.lp.label} report</h2>
+      <div className="meta">{md(r.lp.start)} – {md(r.lp.end)} ({r.lp.total_days} days) · recorded through {md(r.through)}</div>
+      {r.students.length > 1 && <div className="hs-filters" role="group" aria-label="Student">
+        {r.students.map((x, k) => <button key={x.label} className={k === i ? "on" : ""} aria-pressed={k === i} onClick={() => setI(k)}>{x.label}</button>)}
+      </div>}
+      <div className="card">
+        <div className="grid3">
+          <div><b>{st.activities}</b><span>activities</span></div>
+          <div><b>{hours(st.minutes)}</b><span>of learning</span></div>
+          <div><b>{st.days}</b><span>days active</span></div>
+        </div>
+        <div className="meta">Work samples on file: {st.samples_on_file} of {st.samples_required} required</div>
+      </div>
+      <div className="card">
+        <div className="t">Minutes by subject</div>
+        {st.subjects.map((x) => (
+          <div className="hs-row" key={x.subject}>
+            <div className="hs-top"><span>{short(x.subject)}{x.required ? " ·  required" : ""}</span><span>{x.minutes} / {x.target} min</span></div>
+            <div className="hs-track" role="img" aria-label={`${short(x.subject)}: ${x.minutes} of ${x.target} minutes`}><i className="hs-done" style={{ width: `${pct(x.minutes, x.target)}%` }} /></div>
+          </div>))}
+      </div>
+      {st.classes.length > 0 && <div className="card">
+        <div className="t">Enrolled classes</div>
+        {st.classes.map((c) => <div className="meta" key={c.name}>{c.name}{c.schedule ? ` · ${c.schedule}` : ""} · {c.sessions} session{c.sessions === 1 ? "" : "s"} · {c.minutes} min</div>)}
+      </div>}
+      {st.samples.length > 0 && <div className="card">
+        <div className="t">Work samples on file</div>
+        {st.samples.map((x, k) => <div className="meta" key={k}>{md(x.date)} · {x.subjects.map(short).join(", ")}{x.activity ? ` · ${x.activity}` : ""}</div>)}
+      </div>}
+      <button className="link" onClick={() => setLog(!log)} aria-expanded={log}>{log ? "Hide" : "Show"} activity log ({st.log.length})</button>
+      {log && <div className="card">
+        {st.log.map((x, k) => <div className="hs-rec-head" style={{ gridTemplateColumns: "44px 1fr auto" }} key={k}><span className="hs-rec-date">{md(x.date)}</span><span>{x.activity}<span className="meta"> {x.subjects.map(short).join(", ")}</span></span><span className="hs-rec-min">{x.minutes ? `${x.minutes} min` : "–"}</span></div>)}
+      </div>}
+    </>
   );
 }
 
@@ -93,6 +140,8 @@ export default function HomeschoolView({ h }: { h?: Homeschool }) {
           <div className="meta">Drive listing {d.listing_age_min == null ? "age unknown" : agoLabel(d.listing_age_min)}. Unmatched files are waiting for a worksheet entry on the same day and subject.</div>
         </> : <div className="meta">Drive mapping isn't available.</div>}
       </div>
+
+      {h.lp_report && h.lp_report.students.length > 0 && <LpReportView r={h.lp_report} />}
 
       {h.records && <>
         <h2>All entries this period · {h.records.total}</h2>

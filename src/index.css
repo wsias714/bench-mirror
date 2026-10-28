@@ -95,3 +95,4 @@ details.more summary { min-height: 44px; display: flex; align-items: center; col
 .hs-badge { font-size: 11px; padding: 2px 8px; border-radius: 999px; border: 1px solid var(--line); }
 .hs-badge.pending { border-color: var(--warn); background: var(--need); } .hs-badge.upcoming { opacity: .7; }
 .hs-rec-body { padding: 0 0 10px 52px; font-size: 14px; }
+.hs-rec-head > span:nth-child(2) { min-width: 0; padding: 4px 0; }

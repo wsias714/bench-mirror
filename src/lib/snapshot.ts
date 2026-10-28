@@ -26,6 +26,14 @@ export interface Twm {
 export interface HsSubject { subject: string; logged: number; scheduled: number; target: number; expected: number }
 export interface HsDay { date: string; weekday: string; total: number; confirmed: number; pending: number; minutes: number; work_sample: boolean }
 export interface HsRecord { date: string; type: string; program: string; subjects: string[]; minutes: number; status: string; work_sample: boolean; has_file: boolean; future: boolean; text: string }
+export interface LpStudent {
+  label: string; activities: number; days: number; minutes: number; samples_on_file: number; samples_required: number;
+  subjects: { subject: string; minutes: number; target: number; required: boolean }[];
+  classes: { name: string; schedule: string; sessions: number; minutes: number }[];
+  samples: { date: string; subjects: string[]; activity: string }[];
+  log: { date: string; activity: string; subjects: string[]; minutes: number }[];
+}
+export interface LpReport { lp: { id: string; label: string; start: string; end: string; total_days: number }; through: string; students: LpStudent[] }
 export interface Homeschool {
   available: boolean;
   lp?: { label: string; start: string; end: string; elapsed_days: number; total_days: number } | null;
@@ -33,6 +41,7 @@ export interface Homeschool {
   work_samples?: { required: number; have: number; by_subject: { subject: string; n: number }[] };
   drive?: { files: number; linked: number; unmatched: number; undated: number; listing_age_min: number | null; by_subject: { subject: string; files: number; unmatched: number }[] } | null;
   week?: { start: string; end: string; pct: number; pending: number; subjects: HsSubject[]; days: HsDay[] };
+  lp_report?: LpReport | null;
   records?: { total: number; rows: HsRecord[] } | null;
   sync?: { last_ingest_at: string | null; last_attempt_at: string | null; added: number; ok: boolean; skipped: string | null };
 }

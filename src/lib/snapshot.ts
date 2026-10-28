@@ -12,6 +12,13 @@ export interface Delivery {
   next14?: DeliveryRow[]; milestones?: DeliveryRow[]; asks?: DeliveryRow[];
   roadblocks?: { n: number; title: string; lines: { depth: number; text: string }[] }[];
 }
+export interface TlBullet { depth: number; text: string }
+export interface TlRow { c0: string; c1: string; c2: string; c3: string; status: string; status_text: string }
+export interface Timeline12 {
+  available: boolean; status?: string; status_note?: string; goal?: string[]; goal_items?: TlBullet[]; tracks?: TlBullet[];
+  sprints?: { title: string; end: string; rows: TlRow[]; notes: string[] }[]; current?: number;
+  months23?: TlRow[]; quarters?: { title: string; items: TlBullet[] }[]; critical?: TlBullet[];
+}
 export interface Twm {
   available: boolean; as_of?: string; running?: boolean; paused?: boolean;
   failures?: { consecutive: number | null; stop_after: number | null }; builds?: boolean; model?: string;
@@ -26,6 +33,7 @@ export interface Twm {
     probes_red: number; probes_total: number | null; pivots: number | null; unmerged: { headline: string; date: string }[];
   };
   delivery?: Delivery;
+  timeline?: Timeline12;
   decisions_waiting?: { id: string; q: string; due: string; class?: string }[];
   decisions_recent?: { id: string; status: string; q: string }[];
   decisions_council?: string[];

@@ -1,4 +1,4 @@
-import type { Delivery, DeliveryRow, Twm } from "./lib/snapshot.ts";
+import type { Delivery, DeliveryRow, TlBullet, Timeline12, Twm } from "./lib/snapshot.ts";
 
 const when = (ts: string) => {
   const d = new Date(ts.includes("Z") || /[+-]\d\d:\d\d$/.test(ts) ? ts : `${ts}Z`.replace("ZZ", "Z"));
@@ -46,6 +46,46 @@ function DeliveryView({ d }: { d?: Delivery }) {
   );
 }
 
+const Bullets = ({ items }: { items?: TlBullet[] }) => (
+  <>{items?.map((l, i) => <div className="meta" key={i} style={{ marginLeft: l.depth * 10 }}>{l.depth === 0 ? "• " : "– "}{l.text}</div>)}</>
+);
+
+/** ops/TIMELINE.md from the COO: the current sprint first, then the later sprints, months 2-3, the quarters and the critical path. */
+function TimelineView({ t }: { t?: Timeline12 }) {
+  if (!t?.available) return null;
+  const sprints = t.sprints ?? [];
+  const sprint = (sp: (typeof sprints)[number]) => (
+    <>{sp.rows.map((r, i) => (
+      <div className="card" key={i}>
+        <div className="t">{r.c0}</div>
+        <div>{r.c1}</div>
+        {r.c2 && <div className="meta">Done means: {r.c2}</div>}
+        <div><Pill r={r} /></div>
+      </div>))}
+      {sp.notes.map((n, i) => <div className="meta" key={i}>{n}</div>)}</>
+  );
+  const cur = sprints[t.current ?? 0];
+  return (
+    <>
+      <h2>12-month timeline</h2>
+      <div className="meta"><span className={`chip ${t.status === "PROPOSED" ? "warn" : "ok"}`}>{t.status || "status unknown"}</span> {t.status_note}</div>
+      {t.goal?.map((g, i) => <p key={i}>{g}</p>)}
+      {cur && <><div className="eyebrow">Current sprint · {cur.title}</div>{sprint(cur)}</>}
+      {sprints.filter((_, i) => i !== (t.current ?? 0)).map((sp) => <details className="more" key={sp.title}><summary>{sp.title}</summary>{sprint(sp)}</details>)}
+      <details className="more"><summary>Months 2–3</summary>
+        {t.months23?.map((r, i) => (
+          <div className="card" key={i}>
+            <div className="t">{r.c0}</div>
+            <div className="meta">Software: {r.c1}</div><div className="meta">Business: {r.c2}</div><div className="meta">Client acquisition: {r.c3}</div>
+          </div>))}</details>
+      <details className="more"><summary>Months 4–12 ({t.quarters?.length ?? 0} quarters)</summary>
+        {t.quarters?.map((q) => <div className="card" key={q.title}><div className="t">{q.title}</div><Bullets items={q.items} /></div>)}</details>
+      <details className="more"><summary>Critical path</summary><div className="card"><Bullets items={t.critical} /></div></details>
+      <div className="meta">✋ marks a step only you can take.</div>
+    </>
+  );
+}
+
 /** The desktop TWM tab, phone-sized: what ran overnight, what moved, what is waiting, the plan, and build health. */
 export default function TwmView({ t }: { t: Twm }) {
   if (!t.available) return <div className="empty">TWM data isn't available.</div>;
@@ -64,6 +104,7 @@ export default function TwmView({ t }: { t: Twm }) {
       </div>
 
       <DeliveryView d={t.delivery} />
+      <TimelineView t={t.timeline} />
 
       <h2>What it did {d?.title ? `· ${d.title.replace(/^TWM digest\s*/i, "")}` : ""}</h2>
       {d?.notices?.map((n, i) => <p key={i} className="bad"><b>{n}</b></p>)}

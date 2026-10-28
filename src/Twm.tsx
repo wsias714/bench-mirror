@@ -1,10 +1,50 @@
-import type { Twm } from "./lib/snapshot.ts";
+import type { Delivery, DeliveryRow, Twm } from "./lib/snapshot.ts";
 
 const when = (ts: string) => {
   const d = new Date(ts.includes("Z") || /[+-]\d\d:\d\d$/.test(ts) ? ts : `${ts}Z`.replace("ZZ", "Z"));
   return Number.isNaN(d.getTime()) ? ts.slice(0, 16) : ts.slice(5, 10).replace("-", "/") + " " + ts.slice(11, 16);
 };
 const List = ({ items }: { items?: string[] }) => (items?.length ? <ul className="twm-list">{items.map((x, i) => <li key={i}>{x}</li>)}</ul> : null);
+
+const STATUS_CLASS: Record<string, string> = { done: "ok", "on track": "ok", "at risk": "warn", late: "bad", blocked: "bad", "not started": "dim" };
+const Pill = ({ r }: { r: DeliveryRow }) => (r.status
+  ? <><span className={`chip ${STATUS_CLASS[r.status] ?? "dim"}`}>{r.status}</span>{r.status_text.toLowerCase() !== r.status ? <span className="meta"> {r.status_text}</span> : null}</>
+  : r.status_text ? <span className="meta">{r.status_text}</span> : null);
+
+const Rows = ({ rows, cols }: { rows?: DeliveryRow[]; cols: string[] }) => (
+  <>{rows?.map((r, i) => (
+    <div className="card" key={i}>
+      <div className="t">{r.c0}</div>
+      <div>{r.c1}</div>
+      {cols[2] && r.c2 && <div className="meta">{cols[2]}: {r.c2}</div>}
+      {cols[3] && r.c3 && <div className="meta">{cols[3]}: {r.c3}</div>}
+      <div><Pill r={r} /></div>
+    </div>))}</>
+);
+
+/** ops/DELIVERY.md from the COO: the next 14 days, milestones, roadblocks and Wade's asks. */
+function DeliveryView({ d }: { d?: Delivery }) {
+  if (!d?.available) return null;
+  return (
+    <>
+      <h2>Delivery plan</h2>
+      {d.updated && <div className="meta">{d.updated}</div>}
+      {d.summary && <p>{d.summary}</p>}
+      <div className="eyebrow">Next 14 days</div>
+      <Rows rows={d.next14} cols={["When", "Deliverable", "Owner", "You see it in"]} />
+      <details className="more"><summary>Milestones ({d.milestones?.length ?? 0})</summary>
+        <Rows rows={d.milestones} cols={["Date", "Milestone", "Done means"]} /></details>
+      <details className="more"><summary>Roadblocks ({d.roadblocks?.length ?? 0})</summary>
+        {d.roadblocks?.map((r) => (
+          <div className="card" key={r.n}>
+            <div className="t">{r.n}. {r.title}</div>
+            {r.lines.map((l, i) => <div className="meta" key={i} style={{ marginLeft: l.depth * 10 }}>{l.text}</div>)}
+          </div>))}</details>
+      <details className="more"><summary>Your asks ({d.asks?.length ?? 0})</summary>
+        <Rows rows={d.asks} cols={["Ask", "Asked", "Answered by", "Target"]} /></details>
+    </>
+  );
+}
 
 /** The desktop TWM tab, phone-sized: what ran overnight, what moved, what is waiting, the plan, and build health. */
 export default function TwmView({ t }: { t: Twm }) {
@@ -22,6 +62,8 @@ export default function TwmView({ t }: { t: Twm }) {
         {lr && <div className="meta">Last run {when(lr.ts)}: <span className={lr.ok ? "ok" : "bad"}>{lr.ok ? "ok" : "failed"}</span>{lr.moved != null ? `, ${lr.moved} moved` : ""}{lr.ended ? ` · ${lr.ended}` : ""}</div>}
         {t.paused && <div className="meta bad">Kill switch is on.</div>}
       </div>
+
+      <DeliveryView d={t.delivery} />
 
       <h2>What it did {d?.title ? `· ${d.title.replace(/^TWM digest\s*/i, "")}` : ""}</h2>
       {d?.notices?.map((n, i) => <p key={i} className="bad"><b>{n}</b></p>)}

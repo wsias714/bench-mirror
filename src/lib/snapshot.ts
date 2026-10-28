@@ -6,6 +6,12 @@ export interface Thread { title: string; project: string; status: string; needs_
 export interface TlItem { id: string; title: string; domain: string; due: string; days: number | null; lead: number }
 export interface Timeline { days: number; ahead: TlItem[]; overdue: TlItem[]; overdue_total: number }
 export interface HistoryRow { ts: string; ok: boolean | null; moved: number | null; plan_only: boolean; ended: string; mins: number | null; calls: number | null; cost: number | null }
+export interface DeliveryRow { c0: string; c1: string; c2?: string; c3?: string; status: string; status_text: string }
+export interface Delivery {
+  available: boolean; updated?: string; summary?: string;
+  next14?: DeliveryRow[]; milestones?: DeliveryRow[]; asks?: DeliveryRow[];
+  roadblocks?: { n: number; title: string; lines: { depth: number; text: string }[] }[];
+}
 export interface Twm {
   available: boolean; as_of?: string; running?: boolean; paused?: boolean;
   failures?: { consecutive: number | null; stop_after: number | null }; builds?: boolean; model?: string;
@@ -19,7 +25,8 @@ export interface Twm {
     checks: { id: string; status: string }[]; phase: { current: number | null; total: number | null; pct: number | null; title: string };
     probes_red: number; probes_total: number | null; pivots: number | null; unmerged: { headline: string; date: string }[];
   };
-  decisions_waiting?: { id: string; q: string; due: string }[];
+  delivery?: Delivery;
+  decisions_waiting?: { id: string; q: string; due: string; class?: string }[];
   decisions_recent?: { id: string; status: string; q: string }[];
   decisions_council?: string[];
 }

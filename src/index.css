@@ -96,3 +96,5 @@ details.more summary { min-height: 44px; display: flex; align-items: center; col
 .hs-badge.pending { border-color: var(--warn); background: var(--need); } .hs-badge.upcoming { opacity: .7; }
 .hs-rec-body { padding: 0 0 10px 52px; font-size: 14px; }
 .hs-rec-head > span:nth-child(2) { min-width: 0; padding: 4px 0; }
+
+.chip.warn { border-color: var(--warn); color: var(--warn); } .chip.ok { color: var(--ok); } .chip.bad { color: var(--bad); } .chip.dim { opacity: .7; }

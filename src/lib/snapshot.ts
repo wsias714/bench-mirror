@@ -19,6 +19,8 @@ export interface Timeline12 {
   sprints?: { title: string; end: string; rows: TlRow[]; notes: string[] }[]; current?: number;
   months23?: TlRow[]; quarters?: { title: string; items: TlBullet[] }[]; critical?: TlBullet[];
 }
+export interface DeskQuestion { id: string; section: string; text: string; why: string; lean: string; options: string[]; answer: { choice: string; note: string } | null }
+export interface Desk { available: boolean; id?: string; kind?: string; title?: string; intro?: string; due?: string; questions?: DeskQuestion[] }
 export interface Twm {
   available: boolean; as_of?: string; running?: boolean; paused?: boolean;
   failures?: { consecutive: number | null; stop_after: number | null }; builds?: boolean; model?: string;
@@ -34,7 +36,8 @@ export interface Twm {
   };
   delivery?: Delivery;
   timeline?: Timeline12;
-  decisions_waiting?: { id: string; q: string; due: string; class?: string }[];
+  decisions_waiting?: { id: string; q: string; due: string; class?: string; default?: string; answer?: string }[];
+  desk?: Desk;
   decisions_recent?: { id: string; status: string; q: string }[];
   decisions_council?: string[];
 }

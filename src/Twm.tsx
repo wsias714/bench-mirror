@@ -1,3 +1,5 @@
+import { DeskCard, QueueCard } from "./Answer.tsx";
+import type { Sender } from "./Answer.tsx";
 import type { Delivery, DeliveryRow, TlBullet, Timeline12, Twm } from "./lib/snapshot.ts";
 
 const when = (ts: string) => {
@@ -87,7 +89,7 @@ function TimelineView({ t }: { t?: Timeline12 }) {
 }
 
 /** The desktop TWM tab, phone-sized: what ran overnight, what moved, what is waiting, the plan, and build health. */
-export default function TwmView({ t }: { t: Twm }) {
+export default function TwmView({ t, send, can }: { t: Twm; send: Sender; can: boolean }) {
   if (!t.available) return <div className="empty">TWM data isn't available.</div>;
   const lr = t.last_run, f = t.failures, h = t.health, d = t.digest;
   return (
@@ -117,8 +119,10 @@ export default function TwmView({ t }: { t: Twm }) {
         {d?.health && <div className="meta"><b>Health:</b> {d.health}</div>}
       </div>
 
+      {t.desk?.available && <DeskCard d={t.desk} send={send} can={can} />}
+
       <h2>Decisions waiting on you</h2>
-      {t.decisions_waiting?.map((q) => <div className="card" key={q.id}><div className="t">{q.id} · due {q.due}</div><div className="meta">{q.q}</div></div>)}
+      {t.decisions_waiting?.map((q) => <QueueCard key={q.id} q={q} send={send} can={can} />)}
       {t.decisions_council?.map((q, i) => <div className="card" key={i}><div className="meta">{q}</div></div>)}
       {!t.decisions_waiting?.length && !t.decisions_council?.length && <div className="empty">Nothing waiting on you.</div>}
       {t.decisions_recent?.length ? <details className="more"><summary>Recently settled ({t.decisions_recent.length})</summary>

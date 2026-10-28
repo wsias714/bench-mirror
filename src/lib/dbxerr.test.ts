@@ -13,3 +13,9 @@ test("a 401 or a refused refresh is an auth error; a network failure is not", ()
 test("describeError is short and readable", () => {
   assert.match(describeError({ status: 429, error: { error_summary: "too_many_requests/" } }), /HTTP 429: too_many_requests/);
 });
+
+test("a token issued before the write scope is told apart from an expired login", async () => {
+  const { isScopeError } = await import("./dbxerr.ts");
+  assert.equal(isScopeError({ status: 401, error: { error_summary: "missing_scope/.." , error: { ".tag": "missing_scope" } } }), true);
+  assert.equal(isScopeError({ status: 401, error: { error_summary: "expired_access_token/.." } }), false);
+});

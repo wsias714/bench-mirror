@@ -98,3 +98,9 @@ details.more summary { min-height: 44px; display: flex; align-items: center; col
 .hs-rec-head > span:nth-child(2) { min-width: 0; padding: 4px 0; }
 
 .chip.warn { border-color: var(--warn); color: var(--warn); } .chip.ok { color: var(--ok); } .chip.bad { color: var(--bad); } .chip.dim { opacity: .7; }
+
+.ans { display: block; width: 100%; box-sizing: border-box; min-height: 44px; margin-top: 8px; font: inherit; font-size: 16px; padding: 8px; border: 1px solid var(--line); border-radius: 6px; background: var(--card, transparent); color: inherit; }
+.row, .opts { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 8px; }
+.row button, .opts button, button.wide { min-height: 44px; flex: 1 1 40%; padding: 8px 12px; text-align: left; }
+.opts button.on { border-color: var(--ok); color: var(--ok); font-weight: 600; }
+button.wide { width: 100%; margin-top: 8px; text-align: center; }

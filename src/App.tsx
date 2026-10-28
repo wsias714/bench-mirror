@@ -3,7 +3,7 @@ import { SNAPSHOT_PATH } from "./config.ts";
 import { resetApp } from "./Boundary.tsx";
 import {
   describeError, dropboxRemote, finishAuthFromUrl, finishAuthWithCode, getAppKey,
-  isAuthError, isConnected, setAppKey, signOut, startAuth,
+  isAuthError, isConnected, isScopeError, setAppKey, signOut, startAuth,
 } from "./lib/dropbox.ts";
 import { loadCached, saveCached } from "./lib/store.ts";
 import { agoLabel, ageMinutes, dueLabel, parseSnapshot, pill } from "./lib/snapshot.ts";
@@ -11,6 +11,8 @@ import type { Card, Ev, Snapshot, Thread } from "./lib/snapshot.ts";
 import Timeline from "./Timeline.tsx";
 import HomeschoolView from "./Homeschool.tsx";
 import TwmView from "./Twm.tsx";
+import { sendToInbox } from "./lib/inbox.ts";
+import type { Payload } from "./lib/inbox.ts";
 
 type Tab = "today" | "deck" | "week" | "timeline" | "school" | "twm" | "threads";
 const TABS: [Tab, string][] = [["today", "Today"], ["deck", "Deck"], ["week", "Week"], ["timeline", "Timeline"], ["school", "School"], ["twm", "TWM"], ["threads", "Threads"]];
@@ -47,6 +49,18 @@ const ThreadRow = ({ t }: { t: Thread }) => (
 );
 const Empty = ({ text }: { text: string }) => <div className="empty">{text}</div>;
 
+/** The phone's one write: a new file under inbox/. Returns "" or a message to show. */
+async function sendAnswer(p: Payload): Promise<string> {
+  try {
+    await sendToInbox(dropboxRemote(), p);
+    return "";
+  } catch (e) {
+    if (isScopeError(e)) return "This Dropbox login is read-only. Open Settings, sign out, and connect again to allow answers.";
+    if (isAuthError(e)) return "Dropbox login expired. Open Settings and reconnect.";
+    return `Not sent: ${describeError(e)}`;
+  }
+}
+
 function Body({ tab, s }: { tab: Tab; s: Snapshot }) {
   if (tab === "today") {
     const c = s.today.counts;
@@ -73,7 +87,7 @@ function Body({ tab, s }: { tab: Tab; s: Snapshot }) {
       </>
     );
   }
-  return <TwmView t={s.twm} />;
+  return <TwmView t={s.twm} send={sendAnswer} can={isConnected()} />;
 }
 
 export default function App() {
@@ -130,7 +144,7 @@ export default function App() {
       <div className="top">
         <div>
           <h1>Bench</h1>
-          <p className="sub">Read-only mirror{snap ? ` · as of ${agoLabel(ageMinutes(snap, now))}` : ""}</p>
+          <p className="sub">Mirror (answers TWM only){snap ? ` · as of ${agoLabel(ageMinutes(snap, now))}` : ""}</p>
         </div>
         <div className="top-r">
           <button className={`pill ${p.kind}`} onClick={() => (connected ? void load() : setSheet(true))} aria-label="Refresh"><span className="dot" />{p.text}</button>
@@ -180,7 +194,7 @@ function Settings({ onClose, onChange, onForget }: { onClose: () => void; onChan
     <div className="scrim" onClick={onClose}>
       <div className="sheet" onClick={(e) => e.stopPropagation()}>
         <h2>Settings</h2>
-        <p className="note">This app only reads one file Bench writes to your private Dropbox app folder. It cannot change anything in Bench.</p>
+        <p className="note">This app reads one file Bench writes to your private Dropbox app folder. It can send TWM answers (queue decisions and the CEO desk) as new files in that folder's inbox; Bench checks and applies them. It can't change anything else.</p>
         <label className="field">Dropbox app key
           <input value={key} onChange={(e) => setKey(e.target.value)} autoCapitalize="off" autoCorrect="off" spellCheck={false} placeholder="from the Dropbox app console" />
         </label>

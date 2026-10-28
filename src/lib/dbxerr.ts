@@ -4,6 +4,8 @@ export interface DbxError {
   error?: { error_summary?: string; error?: { ".tag"?: string; path?: { ".tag"?: string } } };
 }
 export const summary = (e: unknown) => (e as DbxError)?.error?.error_summary ?? "";
+/** The token was issued before the Dropbox app got its write permission: the person has to reconnect once. */
+export const isScopeError = (e: unknown) => /missing_scope/.test(`${summary(e)} ${JSON.stringify((e as DbxError)?.error ?? "")}`);
 /** The stored login no longer works (revoked, or Dropbox refused the refresh), as opposed to a network blip. */
 export const isAuthError = (e: unknown) => {
   const st = (e as DbxError)?.status;

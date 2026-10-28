@@ -3,11 +3,12 @@ import { DEFAULT_DROPBOX_APP_KEY } from "../config.ts";
 import type { Remote, RemoteFile } from "./remote.ts";
 import { summary } from "./dbxerr.ts";
 import type { DbxError } from "./dbxerr.ts";
-export { describeError, isAuthError } from "./dbxerr.ts";
+export { describeError, isAuthError, isScopeError } from "./dbxerr.ts";
 
 /* Dropbox adapter: OAuth PKCE (no secret anywhere), refresh-token based, scoped by the
-   Dropbox app itself to its own app folder ("App folder" access). READ-ONLY: this file
-   never uploads, moves or deletes. */
+   Dropbox app itself to its own app folder ("App folder" access). The only write is `create`:
+   a new file, mode "add", no autorename, so it can never replace or edit an existing file. This file
+   never moves or deletes anything. */
 
 const K = { appKey: "bm-dbx-appkey", tokens: "bm-dbx-tokens", verifier: "bm-dbx-verifier" };
 
@@ -114,6 +115,10 @@ const isNotFound = (e: unknown) => (e as DbxError)?.status === 409 && summary(e)
 export function dropboxRemote(): Remote {
   const dbx = client();
   return {
+    async create(path, text): Promise<void> {
+      if (!path.startsWith("/inbox/")) throw new Error("The phone only writes under /inbox/.");
+      await dbx.filesUpload({ path, contents: new Blob([text], { type: "application/json" }), mode: { ".tag": "add" }, autorename: false, mute: true });
+    },
     async read(path): Promise<RemoteFile | null> {
       try {
         const res = await dbx.filesDownload({ path });

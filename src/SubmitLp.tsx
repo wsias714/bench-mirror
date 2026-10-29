@@ -29,6 +29,7 @@ export default function SubmitLpCard({ s, send, can }: { s: LpSubmit; send: Send
   return (
     <>
       <h2>Submit {s.lp} to the school</h2>
+      {s.mapping_count ? <div className="meta">{s.mapping_count} log item{s.mapping_count === 1 ? "" : "s"} the matcher could not place; see the Homeschool tab on the desktop.</div> : null}
       {s.last && <div className="meta">Last attempt: {lastText(s.last)}</div>}
       <div className="card">
         {s.candidates.length ? s.candidates.map((c) => {

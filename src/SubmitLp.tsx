@@ -7,6 +7,9 @@ import type { Sender } from "./Answer.tsx";
 
 const md = (d: string) => `${Number(d.slice(5, 7))}/${Number(d.slice(8, 10))}`;
 
+const lastText = (l: NonNullable<LpSubmit["last"]>) =>
+  `${l.outcome === "placed" ? `placed ${l.placed} files` : l.outcome === "failed" ? "copy failed part-way; nothing was removed, submit again to finish" : l.outcome === "refused" ? `refused (${l.reason.join(", ") || "checklist"})` : l.outcome === "stale-plan" ? "the list changed, review and submit again" : l.outcome} · ${l.at.slice(5, 10)} ${l.at.slice(11, 16)} UTC`;
+
 /** Pick the work samples, see the checklist, then confirm. Bench runs the same checks again before it places
     anything in the school's folder, so a stale phone screen cannot submit something that no longer passes. */
 export default function SubmitLpCard({ s, send, can }: { s: LpSubmit; send: Sender; can: boolean }) {
@@ -26,14 +29,15 @@ export default function SubmitLpCard({ s, send, can }: { s: LpSubmit; send: Send
   return (
     <>
       <h2>Submit {s.lp} to the school</h2>
+      {s.last && <div className="meta">Last attempt: {lastText(s.last)}</div>}
       <div className="card">
         {s.candidates.length ? s.candidates.map((c) => {
           const k = sentKey("p", `${s.lp}:${c.key}`);
           const pending = waiting(k);
           return (
-            <button key={c.key} className="wide" disabled={busy || !can || !c.complete || pending || sent}
+            <button key={c.key} className="wide" disabled={busy || !can || !(c.pickable || c.picked) || pending || sent}
               aria-pressed={c.picked} onClick={() => void go(lpPick(s.lp, c.key, !c.picked), k)}>
-              {c.picked ? "✓ " : ""}{c.subject} · {md(c.date)}{c.complete ? "" : " (missing a file)"}{pending ? " · sent" : ""}
+              {c.picked ? "✓ " : ""}{c.subject} · {md(c.date)}{c.reason ? ` (can't submit: ${c.reason})` : ""}{pending ? " · sent" : ""}
             </button>);
         }) : <div className="meta">No work samples on file for this period yet.</div>}
         <div className="meta">Tap to pick or unpick. Changes show here after Bench's next update (within 15 minutes).</div>

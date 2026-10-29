@@ -54,7 +54,8 @@ export interface LpStudent {
 export interface LpReport { lp: { id: string; label: string; start: string; end: string; total_days: number }; through: string; students: LpStudent[] }
 export interface LpSubmit {
   lp: string; ready: boolean; plan_hash: string;
-  candidates: { key: string; date: string; subject: string; picked: boolean; complete: boolean }[];
+  last?: { outcome: string; at: string; placed: number; who: string; reason: string[] } | null;
+  candidates: { key: string; date: string; subject: string; picked: boolean; complete: boolean; pickable: boolean; reason: string }[];
   checks: { label: string; ok: boolean }[];
   files: { samples: number; reports: number; already_there: number };
 }

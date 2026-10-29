@@ -52,6 +52,12 @@ export interface LpStudent {
   log: { date: string; activity: string; subjects: string[]; minutes: number }[];
 }
 export interface LpReport { lp: { id: string; label: string; start: string; end: string; total_days: number }; through: string; students: LpStudent[] }
+export interface LpSubmit {
+  lp: string; ready: boolean; plan_hash: string;
+  candidates: { key: string; date: string; subject: string; picked: boolean; complete: boolean }[];
+  checks: { label: string; ok: boolean }[];
+  files: { samples: number; reports: number; already_there: number };
+}
 export interface Homeschool {
   available: boolean;
   lp?: { label: string; start: string; end: string; elapsed_days: number; total_days: number } | null;
@@ -60,6 +66,7 @@ export interface Homeschool {
   drive?: { files: number; linked: number; unmatched: number; undated: number; listing_age_min: number | null; by_subject: { subject: string; files: number; unmatched: number }[] } | null;
   week?: { start: string; end: string; pct: number; pending: number; subjects: HsSubject[]; days: HsDay[] };
   lp_report?: LpReport | null;
+  submit?: LpSubmit | null;
   records?: { total: number; rows: HsRecord[] } | null;
   sync?: { last_ingest_at: string | null; last_attempt_at: string | null; added: number; ok: boolean; skipped: string | null };
 }

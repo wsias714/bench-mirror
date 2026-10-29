@@ -77,7 +77,7 @@ function Body({ tab, s }: { tab: Tab; s: Snapshot }) {
   if (tab === "deck") return s.deck.length ? <>{s.deck.map((c) => <CardRow key={c.id} c={c} />)}</> : <Empty text="Deck is clear." />;
   if (tab === "week") return s.week.length ? <>{s.week.map((e) => <EventRow key={e.id} e={e} />)}</> : <Empty text="No deadlines in the next 7 days." />;
   if (tab === "timeline") return s.timeline ? <Timeline tl={s.timeline} /> : <Empty text="Timeline arrives with the next Bench update (within 15 minutes)." />;
-  if (tab === "school") return <HomeschoolView h={s.homeschool} />;
+  if (tab === "school") return <HomeschoolView h={s.homeschool} send={sendAnswer} can={isConnected()} />;
   if (tab === "threads") {
     return (
       <>

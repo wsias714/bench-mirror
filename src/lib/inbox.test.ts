@@ -1,6 +1,6 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { deskAnswers, isWaiting, pruneSent, queueAcceptDefault, queueAnswer, sendToInbox, sentKey } from "./inbox.ts";
+import { deskAnswers, isWaiting, lpPick, lpSubmit, pruneSent, queueAcceptDefault, queueAnswer, sendToInbox, sentKey } from "./inbox.ts";
 import type { Remote } from "./remote.ts";
 
 const now = new Date("2026-10-28T20:00:00Z");
@@ -29,4 +29,11 @@ test("sent markers expire so a rejected answer can be retried", () => {
   assert.equal(isWaiting({ [k]: t }, k, t + 60_000), true);
   assert.equal(isWaiting({ [k]: t }, k, t + 4 * 3600_000), false);
   assert.deepEqual(pruneSent({ a: t, b: t - 5 * 3600_000 }, t), { a: t });
+});
+
+test("LP pick and submit payloads carry exactly the fields Bench's schema accepts", () => {
+  assert.deepEqual(lpPick("LP2", "2026-10-25|Science", true, now, ID),
+    { v: 1, id: ID, created: "2026-10-28T20:00:00.000Z", kind: "lp_pick", lp: "LP2", key: "2026-10-25|Science", picked: true });
+  assert.deepEqual(lpSubmit("LP2", "0123456789abcdef", now, ID),
+    { v: 1, id: ID, created: "2026-10-28T20:00:00.000Z", kind: "lp_submit", lp: "LP2", plan_hash: "0123456789abcdef" });
 });

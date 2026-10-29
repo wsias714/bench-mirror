@@ -1,6 +1,8 @@
 import { useState } from "react";
 import { agoLabel } from "./lib/snapshot.ts";
 import type { Homeschool, HsRecord, HsSubject, LpReport } from "./lib/snapshot.ts";
+import SubmitLpCard from "./SubmitLp.tsx";
+import type { Sender } from "./Answer.tsx";
 import { PACE_TEXT, bar, hours, pace, syncState } from "./lib/homeschool.ts";
 
 const SHORT: Record<string, string> = { "Language Arts": "Lang. Arts", "Social Studies": "Soc. Studies", "Physical Education": "P.E.", "Social-Emotional": "Soc-Emo" };
@@ -94,7 +96,7 @@ function LpReportView({ r }: { r: LpReport }) {
 }
 
 /** The desktop Homeschool tab, phone-sized and no child names or file names reach this view; entry text is masked by Bench before it is published. */
-export default function HomeschoolView({ h }: { h?: Homeschool }) {
+export default function HomeschoolView({ h, send, can }: { h?: Homeschool; send: Sender; can: boolean }) {
   const [wk, setWk] = useState(false);
   const [filter, setFilter] = useState<Filter>("all");
   if (!h) return <div className="empty">School arrives with the next Bench update (within 15 minutes).</div>;
@@ -140,6 +142,8 @@ export default function HomeschoolView({ h }: { h?: Homeschool }) {
           <div className="meta">Drive listing {d.listing_age_min == null ? "age unknown" : agoLabel(d.listing_age_min)}. Unmatched files are waiting for a worksheet entry on the same day and subject.</div>
         </> : <div className="meta">Drive mapping isn't available.</div>}
       </div>
+
+      {h.submit && <SubmitLpCard s={h.submit} send={send} can={can} />}
 
       {h.lp_report && h.lp_report.students.length > 0 && <LpReportView r={h.lp_report} />}
 

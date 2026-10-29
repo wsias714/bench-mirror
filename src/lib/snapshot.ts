@@ -21,7 +21,24 @@ export interface Timeline12 {
 }
 export interface DeskQuestion { id: string; section: string; text: string; why: string; lean: string; options: string[]; answer: { choice: string; note: string } | null }
 export interface Desk { available: boolean; id?: string; kind?: string; title?: string; intro?: string; due?: string; questions?: DeskQuestion[] }
+export interface BoardBlock { goal: string; done: string; status: string; status_text: string }
+export interface BoardSeg { start: string; end: string; blocks: Record<string, BoardBlock | string | string[]> }
+export interface Board {
+  available: boolean; today?: string; lanes?: string[];
+  strip?: {
+    decisions: { queue: number; desk: number; total: number };
+    sprint: { n: number; day: number; of: number; goals: { lane: string; status: string }[] } | null;
+    milestone: { name: string; date: string; days: number; wade: boolean } | null;
+    health: { last: string; ended: string; nights: number; of: number; days: { date: string; state: string; ended: string }[] };
+  };
+  sprints?: (BoardSeg & { n: number; current: boolean })[];
+  months?: (BoardSeg & { label: string })[];
+  quarters?: (BoardSeg & { title: string })[];
+  milestones?: { date: string; name: string; wade: boolean; status: string }[];
+  stages?: { stage: string; window: string; status: string }[];
+}
 export interface Twm {
+  board?: Board;
   available: boolean; as_of?: string; running?: boolean; paused?: boolean;
   failures?: { consecutive: number | null; stop_after: number | null }; builds?: boolean; model?: string;
   last_run?: { ts: string; ok: boolean | null; moved?: number | null; ended: string }; next_run?: string;

@@ -1,3 +1,4 @@
+import TwmBoard from "./TwmBoard.tsx";
 import { DeskCard, QueueCard } from "./Answer.tsx";
 import type { Sender } from "./Answer.tsx";
 import type { Delivery, DeliveryRow, TlBullet, Timeline12, Twm } from "./lib/snapshot.ts";
@@ -94,6 +95,7 @@ export default function TwmView({ t, send, can }: { t: Twm; send: Sender; can: b
   const lr = t.last_run, f = t.failures, h = t.health, d = t.digest;
   return (
     <>
+      <TwmBoard b={t.board} />
       <div className="card">
         <div className="t">Weekly report: {t.weekly_verdict || "none in the latest digest"}</div>
         <div className="grid3">

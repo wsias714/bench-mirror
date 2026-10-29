@@ -104,3 +104,21 @@ details.more summary { min-height: 44px; display: flex; align-items: center; col
 .row button, .opts button, button.wide { min-height: 44px; flex: 1 1 40%; padding: 8px 12px; text-align: left; }
 .opts button.on { border-color: var(--ok); color: var(--ok); font-weight: 600; }
 button.wide { width: 100%; margin-top: 8px; text-align: center; }
+
+/* TWM board */
+.board-strip { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 8px; } .board-strip .card { margin: 0; min-width: 0; }
+.board-strip b { font-size: 22px; } .board-strip .meta { overflow-wrap: anywhere; }
+.sdot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: var(--muted); vertical-align: middle; }
+.sdot.ok { background: var(--ok); } .sdot.warn { background: var(--warn); } .sdot.bad { background: var(--bad); }
+.nights { display: flex; gap: 3px; flex-wrap: wrap; margin-top: 6px; } .night { width: 10px; height: 10px; border-radius: 50%; background: var(--ok); }
+.night.n-failed, .night.n-missed { background: var(--bad); } .night.n-skipped { background: var(--muted); }
+.night.n-planned { background: transparent; border: 2px solid var(--ok); box-sizing: border-box; }
+.gscroll { overflow-x: auto; overscroll-behavior-x: contain; max-width: 100%; border: 1px solid var(--line); border-radius: 10px; margin: 8px 0; }
+.gantt { position: relative; } .sh { position: absolute; top: 0; height: 20px; font-size: 11px; color: var(--muted); padding-left: 6px; border-left: 1px solid var(--line); box-sizing: border-box; overflow: hidden; white-space: nowrap; }
+.lane { position: absolute; left: 0; right: 0; border-top: 1px dashed var(--line); } .lane span { font-size: 9px; text-transform: uppercase; color: var(--muted); margin-left: 4px; }
+.blk { position: absolute; box-sizing: border-box; text-align: left; font-size: 11px; line-height: 1.25; padding: 12px 6px 3px; border: 1px solid var(--line); border-radius: 6px; background: var(--card); color: var(--ink); overflow: hidden; min-height: 0; }
+.blk.k-month { background: rgba(120,140,200,.1); } .blk.k-quarter { background: rgba(120,140,200,.2); } .blk.cur { border-color: var(--accent); }
+.ms { position: absolute; width: 22px; height: 22px; min-height: 0; padding: 0; border: 0; background: transparent; }
+.ms::before { content: ""; position: absolute; left: 4px; top: 4px; width: 14px; height: 14px; transform: rotate(45deg); background: var(--accent); }
+.ms.wade::before { background: var(--warn); }
+.today { position: absolute; top: 0; bottom: 0; width: 2px; background: var(--bad); pointer-events: none; }

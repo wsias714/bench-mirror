@@ -37,7 +37,7 @@ export default function SubmitLpCard({ s, send, can }: { s: LpSubmit; send: Send
           return (
             <button key={c.key} className="wide" disabled={busy || !can || !(c.pickable || c.picked) || pending || sent}
               aria-pressed={c.picked} onClick={() => void go(lpPick(s.lp, c.key, !c.picked), k)}>
-              {c.picked ? "✓ " : ""}{c.subject} · {md(c.date)}{c.reason ? ` (can't submit: ${c.reason})` : ""}{pending ? " · sent" : ""}
+              {c.picked ? "✓ " : ""}{c.subject} · {md(c.date)}{c.reason ? ` (can't submit: ${c.reason})` : ""}{c.flag ? " ⚠ 2 files, both go" : ""}{pending ? " · sent" : ""}
             </button>);
         }) : <div className="meta">No work samples on file for this period yet.</div>}
         <div className="meta">Tap to pick or unpick. Changes show here after Bench's next update (within 15 minutes).</div>

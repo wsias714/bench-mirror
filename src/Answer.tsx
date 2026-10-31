@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { deskAnswers, isWaiting, pruneSent, queueAcceptDefault, queueAnswer, sentKey } from "./lib/inbox.ts";
 import type { Payload, Sent } from "./lib/inbox.ts";
 import type { Desk, Twm } from "./lib/snapshot.ts";
@@ -19,12 +19,24 @@ export function useSent() {
   return { waiting: (key: string) => isWaiting(sent, key), mark };
 }
 
+/** useState that keeps its value in localStorage per entry, so a half-typed answer survives leaving the app.
+    Pass "" as the key to skip storage. A per-viewer convenience only: reads and writes never throw. */
+export function useDraft<T>(key: string, empty: T): [T, (v: T) => void, () => void] {
+  const full = `bm-draft:${key}`;
+  const read = (): T => { try { const r = localStorage.getItem(full); return r ? (JSON.parse(r) as T) : empty; } catch { return empty; } };
+  const [v, setV] = useState<T>(read);
+  useEffect(() => { setV(read()); }, [full]); // eslint-disable-line react-hooks/exhaustive-deps
+  const set = (n: T) => { setV(n); try { if (JSON.stringify(n) === JSON.stringify(empty)) localStorage.removeItem(full); else localStorage.setItem(full, JSON.stringify(n)); } catch { /* ignore */ } };
+  const clear = () => { setV(empty); try { localStorage.removeItem(full); } catch { /* ignore */ } };
+  return [v, set, clear];
+}
+
 const APPLIES = "Answered, applies at the next 23:00 cycle";
 const WAIT = "Sent. Bench picks it up within 15 minutes.";
 
 export function QueueCard({ q, send, can }: { q: NonNullable<Twm["decisions_waiting"]>[number]; send: Sender; can: boolean }) {
   const { waiting, mark } = useSent();
-  const [text, setText] = useState("");
+  const [text, setText, clearText] = useDraft(`q:${q.id}`, "");
   const [busy, setBusy] = useState(false);
   const [err, setErr] = useState("");
   const key = sentKey("q", q.id);
@@ -32,7 +44,7 @@ export function QueueCard({ q, send, can }: { q: NonNullable<Twm["decisions_wait
     setBusy(true); setErr("");
     const m = await send(p);
     setBusy(false);
-    if (m) setErr(m); else mark(key);
+    if (m) setErr(m); else { mark(key); clearText(); }
   };
   return (
     <div className="card">
@@ -57,12 +69,12 @@ export function QueueCard({ q, send, can }: { q: NonNullable<Twm["decisions_wait
 
 export function DeskCard({ d, send, can }: { d: Desk; send: Sender; can: boolean }) {
   const { waiting, mark } = useSent();
-  const [pick, setPick] = useState<Record<string, string>>({});
-  const [note, setNote] = useState<Record<string, string>>({});
+  const sid = d.id ?? "";
+  const [pick, setPick, clearPick] = useDraft<Record<string, string>>(`desk:${sid}:pick`, {});
+  const [note, setNote, clearNote] = useDraft<Record<string, string>>(`desk:${sid}:note`, {});
   const [busy, setBusy] = useState(false);
   const [err, setErr] = useState("");
   const qs = d.questions ?? [];
-  const sid = d.id ?? "";
   const open = qs.filter((q) => !q.answer && !waiting(sentKey("d", sid, q.id)));
   const ready = Object.fromEntries(open.filter((q) => pick[q.id] || (note[q.id] ?? "").trim())
     .map((q) => [q.id, { choice: pick[q.id] ?? "", note: (note[q.id] ?? "").trim() }]));
@@ -70,7 +82,7 @@ export function DeskCard({ d, send, can }: { d: Desk; send: Sender; can: boolean
     setBusy(true); setErr("");
     const m = await send(deskAnswers(sid, ready));
     setBusy(false);
-    if (m) setErr(m); else Object.keys(ready).forEach((id) => mark(sentKey("d", sid, id)));
+    if (m) setErr(m); else { Object.keys(ready).forEach((id) => mark(sentKey("d", sid, id))); clearPick(); clearNote(); }
   };
   return (
     <>

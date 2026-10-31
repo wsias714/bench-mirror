@@ -122,3 +122,7 @@ button.wide { width: 100%; margin-top: 8px; text-align: center; }
 .ms::before { content: ""; position: absolute; left: 4px; top: 4px; width: 14px; height: 14px; transform: rotate(45deg); background: var(--accent); }
 .ms.wade::before { background: var(--warn); }
 .today { position: absolute; top: 0; bottom: 0; width: 2px; background: var(--bad); pointer-events: none; }
+
+.fb { margin-top: 6px; } .fb-btn { min-height: 36px; font-size: 13px; padding: 4px 12px; }
+.fb-note { font-size: 13px; margin-top: 6px; padding: 6px 8px; border-left: 3px solid var(--warn); border-radius: 4px; }
+.fb-note.answered { border-left-color: var(--ok); } .fb-ans { margin-top: 4px; color: var(--muted); }

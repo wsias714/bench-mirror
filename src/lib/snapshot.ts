@@ -8,6 +8,7 @@ export interface Timeline { days: number; ahead: TlItem[]; overdue: TlItem[]; ov
 export interface HistoryRow { ts: string; ok: boolean | null; moved: number | null; plan_only: boolean; ended: string; mins: number | null; calls: number | null; cost: number | null }
 export interface DeliveryRow { c0: string; c1: string; c2?: string; c3?: string; status: string; status_text: string }
 export interface Delivery {
+  out_of_date?: string;
   available: boolean; updated?: string; summary?: string;
   next14?: DeliveryRow[]; milestones?: DeliveryRow[]; asks?: DeliveryRow[];
   roadblocks?: { n: number; title: string; lines: { depth: number; text: string }[] }[];
@@ -34,11 +35,13 @@ export interface Board {
   sprints?: (BoardSeg & { n: number; current: boolean })[];
   months?: (BoardSeg & { label: string })[];
   quarters?: (BoardSeg & { title: string })[];
-  milestones?: { date: string; name: string; wade: boolean; status: string }[];
+  milestones?: { date: string; name: string; wade: boolean; status: string; source: "delivery" | "timeline" }[];
   stages?: { stage: string; window: string; status: string }[];
 }
+export interface Feedback { id: string; file: string; where: string; item: string; text: string; status: "open" | "answered"; answered: string; answer: string }
+export interface Surfaces { available: boolean; night?: string; ok?: boolean; surfaces?: { surface: string; ok: boolean; why: string }[] }
 export interface Twm {
-  board?: Board;
+  board?: Board; feedback?: Feedback[]; surfaces?: Surfaces;
   available: boolean; as_of?: string; running?: boolean; paused?: boolean;
   failures?: { consecutive: number | null; stop_after: number | null }; builds?: boolean; model?: string;
   last_run?: { ts: string; ok: boolean | null; moved?: number | null; ended: string }; next_run?: string;

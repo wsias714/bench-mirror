@@ -9,6 +9,7 @@ export const INBOX_DIR = "/inbox";
 export type Payload =
   | { v: 1; id: string; kind: "twm_queue"; created: string; qid: string; answer: string }
   | { v: 1; id: string; kind: "twm_queue"; created: string; qid: string; accept_default: true }
+  | { v: 1; id: string; kind: "twm_feedback"; created: string; file: string; where: string; item: string; text: string }
   | { v: 1; id: string; kind: "lp_pick"; created: string; lp: string; key: string; picked: boolean }
   | { v: 1; id: string; kind: "lp_submit"; created: string; lp: string; plan_hash: string }
   | { v: 1; id: string; kind: "twm_desk"; created: string; set: string; answers: Record<string, { choice: string; note: string }> };
@@ -22,6 +23,9 @@ export const queueAcceptDefault = (qid: string, now = new Date(), id = uuid()): 
   ({ ...head(now, id), kind: "twm_queue", qid, accept_default: true });
 export const deskAnswers = (set: string, answers: Record<string, { choice: string; note: string }>, now = new Date(), id = uuid()): Payload =>
   ({ ...head(now, id), kind: "twm_desk", set, answers });
+
+export const twmFeedback = (file: string, where: string, item: string, text: string, now = new Date(), id = uuid()): Payload =>
+  ({ ...head(now, id), kind: "twm_feedback", file, where, item: item.slice(0, 200), text: text.trim() });
 
 export const lpPick = (lp: string, key: string, picked: boolean, now = new Date(), id = uuid()): Payload =>
   ({ ...head(now, id), kind: "lp_pick", lp, key, picked });

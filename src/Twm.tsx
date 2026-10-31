@@ -1,3 +1,4 @@
+import Comment, { FEEDBACK_FILES, FeedbackCtx } from "./Comment.tsx";
 import TwmBoard from "./TwmBoard.tsx";
 import { DeskCard, QueueCard } from "./Answer.tsx";
 import type { Sender } from "./Answer.tsx";
@@ -14,7 +15,7 @@ const Pill = ({ r }: { r: DeliveryRow }) => (r.status
   ? <><span className={`chip ${STATUS_CLASS[r.status] ?? "dim"}`}>{r.status}</span>{r.status_text.toLowerCase() !== r.status ? <span className="meta"> {r.status_text}</span> : null}</>
   : r.status_text ? <span className="meta">{r.status_text}</span> : null);
 
-const Rows = ({ rows, cols }: { rows?: DeliveryRow[]; cols: string[] }) => (
+const Rows = ({ rows, cols, where }: { rows?: DeliveryRow[]; cols: string[]; where?: string }) => (
   <>{rows?.map((r, i) => (
     <div className="card" key={i}>
       <div className="t">{r.c0}</div>
@@ -22,6 +23,7 @@ const Rows = ({ rows, cols }: { rows?: DeliveryRow[]; cols: string[] }) => (
       {cols[2] && r.c2 && <div className="meta">{cols[2]}: {r.c2}</div>}
       {cols[3] && r.c3 && <div className="meta">{cols[3]}: {r.c3}</div>}
       <div><Pill r={r} /></div>
+      {where && <Comment file={FEEDBACK_FILES.delivery} where={where} item={r.c1} />}
     </div>))}</>
 );
 
@@ -32,11 +34,12 @@ function DeliveryView({ d }: { d?: Delivery }) {
     <>
       <h2>Delivery plan</h2>
       {d.updated && <div className="meta">{d.updated}</div>}
+      {d.out_of_date && <div className="card need"><b>Out of date:</b> {d.out_of_date}</div>}
       {d.summary && <p>{d.summary}</p>}
       <div className="eyebrow">Next 14 days</div>
-      <Rows rows={d.next14} cols={["When", "Deliverable", "Owner", "You see it in"]} />
+      <Rows rows={d.next14} cols={["When", "Deliverable", "Owner", "You see it in"]} where="Next 14 days" />
       <details className="more"><summary>Milestones ({d.milestones?.length ?? 0})</summary>
-        <Rows rows={d.milestones} cols={["Date", "Milestone", "Done means"]} /></details>
+        <Rows rows={d.milestones} cols={["Date", "Milestone", "Done means"]} where="Milestones" /></details>
       <details className="more"><summary>Roadblocks ({d.roadblocks?.length ?? 0})</summary>
         {d.roadblocks?.map((r) => (
           <div className="card" key={r.n}>
@@ -64,6 +67,7 @@ function TimelineView({ t }: { t?: Timeline12 }) {
         <div>{r.c1}</div>
         {r.c2 && <div className="meta">Done means: {r.c2}</div>}
         <div><Pill r={r} /></div>
+        <Comment file={FEEDBACK_FILES.timeline} where={`Sprint ${/Sprint\s+(\d+)/.exec(sp.title)?.[1] ?? "?"} > ${r.c0.replace(/[*`_]/g, "").trim()}`} item={r.c1} />
       </div>))}
       {sp.notes.map((n, i) => <div className="meta" key={i}>{n}</div>)}</>
   );
@@ -95,7 +99,8 @@ export default function TwmView({ t, send, can }: { t: Twm; send: Sender; can: b
   const lr = t.last_run, f = t.failures, h = t.health, d = t.digest;
   return (
     <>
-      <TwmBoard b={t.board} />
+      <FeedbackCtx.Provider value={{ items: t.feedback ?? [], send, can }}>
+      <TwmBoard b={t.board} surfaces={t.surfaces} />
       <div className="card">
         <div className="t">Weekly report: {t.weekly_verdict || "none in the latest digest"}</div>
         <div className="grid3">
@@ -109,6 +114,7 @@ export default function TwmView({ t, send, can }: { t: Twm; send: Sender; can: b
 
       <DeliveryView d={t.delivery} />
       <TimelineView t={t.timeline} />
+      </FeedbackCtx.Provider>
 
       <h2>What it did {d?.title ? `· ${d.title.replace(/^TWM digest\s*/i, "")}` : ""}</h2>
       {d?.notices?.map((n, i) => <p key={i} className="bad"><b>{n}</b></p>)}

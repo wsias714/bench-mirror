@@ -1,5 +1,6 @@
 import { useMemo, useState } from "react";
-import type { Board, BoardBlock } from "./lib/snapshot.ts";
+import type { Board, BoardBlock, Surfaces } from "./lib/snapshot.ts";
+import Comment, { FEEDBACK_FILES } from "./Comment.tsx";
 
 type Seg = { kind: "sprint" | "month" | "quarter"; x: number; w: number; a: number; z: number; label: string; current: boolean; blocks: Record<string, BoardBlock | string | string[]> };
 const W = { sprint: 150, month: 120, quarter: 140 };
@@ -8,7 +9,10 @@ const sdot = (s: string) => `sdot ${s === "on track" ? "ok" : s === "at risk" ? 
 const HEALTH: Record<string, string> = { ran: "Ran last night", failed: "Failed last night", skipped: "Skipped last night", planned: "Planned only last night", missed: "Didn't run last night", none: "No runs yet" };
 
 /** Summary strip plus one horizontal plan: sprints, then months, then quarters. Scrolls sideways inside its own box. */
-export default function TwmBoard({ b }: { b?: Board }) {
+const LANE_FULL: Record<string, string> = { "Client acq.": "Client acquisition" };
+const plainLabel = (t: string) => t.replace(/[*`]/g, "").split("(")[0].trim();
+
+export default function TwmBoard({ b, surfaces }: { b?: Board; surfaces?: Surfaces }) {
   const [pick, setPick] = useState<string | null>(null);
   const g = useMemo(() => {
     if (!b?.available) return null;
@@ -30,6 +34,7 @@ export default function TwmBoard({ b }: { b?: Board }) {
   const st = b.strip, lanes = b.lanes ?? [];
   const H = HEAD + lanes.length * LH + 30;
   const detail: Record<string, string[]> = {};
+  const target: Record<string, { file: string; where: string; item: string }> = {};
   const blocks = lanes.flatMap((lane, li) => g.segs.map((s, si) => {
     const v = s.blocks[lane]; if (!v) return null;
     const text = typeof v === "string" ? v : Array.isArray(v) ? v[0] : v.goal; if (!text) return null;
@@ -37,16 +42,22 @@ export default function TwmBoard({ b }: { b?: Board }) {
     detail[id] = typeof v === "string" ? [`${s.label} · ${lane}`, v] : Array.isArray(v) ? [`${s.label} · ${lane}`, ...v]
       : [`${s.label} · ${lane}${v.status ? ` (${v.status})` : ""}`, v.goal, v.done ? `Done means: ${v.done}` : "", v.status_text];
     const status = typeof v === "object" && !Array.isArray(v) ? v.status : "";
+    const full = LANE_FULL[lane] ?? lane;
+    target[id] = s.kind === "sprint" ? { file: FEEDBACK_FILES.timeline, where: `${s.label} > ${full}`, item: text }
+      : s.kind === "month" ? { file: FEEDBACK_FILES.timeline, where: `Months 2–3 > ${plainLabel(s.label.replace(/^to /, ""))} > ${full}`, item: text }
+      : { file: FEEDBACK_FILES.timeline, where: `${s.label} > ${full}`, item: text };
     return <button key={id} className={`blk k-${s.kind}${s.current ? " cur" : ""}`} onClick={() => setPick(id)}
       style={{ left: s.x + 2, width: s.w - 4, top: HEAD + li * LH + 4, height: LH - 8 }}>
       {status && <span className={sdot(status)} />} {text}</button>;
   }));
   const miles = (b.milestones ?? []).map((m, i) => {
     const id = `m${i}`; detail[id] = [`${m.wade ? "✋ " : ""}${m.name}`, m.date + (m.status ? ` · ${m.status}` : "")];
+    target[id] = { file: m.source === "delivery" ? FEEDBACK_FILES.delivery : FEEDBACK_FILES.timeline, where: "Milestones", item: m.name };
     return <button key={id} className={`ms${m.wade ? " wade" : ""}`} aria-label={m.name} onClick={() => setPick(id)}
       style={{ left: g.xOf(m.date) - 11, top: H - 28 }} />;
   });
   const hl = st.health, ms = st.milestone, sp = st.sprint;
+  const stale = (surfaces?.available ? surfaces.surfaces ?? [] : []).filter((x) => !x.ok);
   return (
     <>
       <div className="board-strip">
@@ -59,6 +70,7 @@ export default function TwmBoard({ b }: { b?: Board }) {
         <div className="card"><div className="eyebrow">Health</div>
           <b className={hl.last === "ran" ? "ok" : hl.last === "failed" || hl.last === "missed" ? "bad" : "warn"}>{HEALTH[hl.last] ?? hl.last}</b>
           <div className="meta">{hl.of ? `${hl.nights} of ${hl.of} nights this sprint` : "sprint starts soon"}{hl.ended ? ` · ${hl.ended}` : ""}</div>
+          {stale.length > 0 && <div className="meta warn">⚠ {stale.length} out of date: {stale.map((x) => `${x.surface}${x.why ? ` (${x.why})` : ""}`).join("; ")}</div>}
           <div className="nights">{hl.days.map((d) => <span key={d.date} className={`night n-${d.state}`} title={`${d.date} ${d.state}`} />)}</div></div>
       </div>
       <h2>Plan on one line</h2>
@@ -69,8 +81,10 @@ export default function TwmBoard({ b }: { b?: Board }) {
         {blocks}{miles}
         <div className="today" style={{ left: g.xOf(b.today ?? "") }} />
       </div></div>
-      {pick && detail[pick] && <div className="card pop" onClick={() => setPick(null)}>
-        {detail[pick].filter(Boolean).map((t, i) => i === 0 ? <div className="t" key={i}>{t}</div> : <div key={i} className={i > 1 ? "meta" : ""}>{t}</div>)}</div>}
+      {pick && detail[pick] && <div className="card pop">
+        <button className="fb-btn" onClick={() => setPick(null)}>Close</button>
+        {detail[pick].filter(Boolean).map((t, i) => i === 0 ? <div className="t" key={i}>{t}</div> : <div key={i} className={i > 1 ? "meta" : ""}>{t}</div>)}
+        {target[pick] && <div onClick={(e) => e.stopPropagation()}><Comment key={pick} {...target[pick]} /></div>}</div>}
     </>
   );
 }

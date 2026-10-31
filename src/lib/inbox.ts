@@ -12,7 +12,8 @@ export type Payload =
   | { v: 1; id: string; kind: "twm_feedback"; created: string; file: string; where: string; item: string; text: string }
   | { v: 1; id: string; kind: "lp_pick"; created: string; lp: string; key: string; picked: boolean }
   | { v: 1; id: string; kind: "lp_submit"; created: string; lp: string; plan_hash: string }
-  | { v: 1; id: string; kind: "twm_desk"; created: string; set: string; answers: Record<string, { choice: string; note: string }> };
+  | { v: 1; id: string; kind: "twm_desk"; created: string; set: string; answers: Record<string, { choice: string; note: string }> }
+  | { v: 1; id: string; kind: "feedback"; created: string; app: "bench-mirror"; fkind: "bug" | "idea" | "other"; fversion: string; text: string };
 
 const uuid = () => (globalThis.crypto as Crypto).randomUUID();
 const head = (now: Date, id: string) => ({ v: 1 as const, id, created: now.toISOString() });

@@ -12,6 +12,7 @@ import Timeline from "./Timeline.tsx";
 import HomeschoolView from "./Homeschool.tsx";
 import TwmView from "./Twm.tsx";
 import { sendToInbox } from "./lib/inbox.ts";
+import { openFeedback } from "./feedback.ts";
 import type { Payload } from "./lib/inbox.ts";
 
 type Tab = "today" | "deck" | "week" | "timeline" | "school" | "twm" | "threads";
@@ -194,6 +195,7 @@ function Settings({ onClose, onChange, onForget }: { onClose: () => void; onChan
     <div className="scrim" onClick={onClose}>
       <div className="sheet" onClick={(e) => e.stopPropagation()}>
         <h2>Settings</h2>
+        <button className="primary" onClick={openFeedback}>Send feedback</button>
         <p className="note">This app reads one file Bench writes to your private Dropbox app folder. It can send TWM answers (queue decisions and the CEO desk) as new files in that folder's inbox; Bench checks and applies them. It can't change anything else.</p>
         <label className="field">Dropbox app key
           <input value={key} onChange={(e) => setKey(e.target.value)} autoCapitalize="off" autoCorrect="off" spellCheck={false} placeholder="from the Dropbox app console" />

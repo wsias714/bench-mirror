@@ -11,10 +11,14 @@ export const toUuid = (hex16: string) => {
 
 /** In-app Feedback button (shared module). The phone's only write path is inbox/<uuid>.json, so feedback goes
     there as a `feedback` payload that Bench validates (src/mirror_inbox.py) and files into the housekeeping ledger. */
+let handle: { open: () => void } | null = null;
+/** Opens the feedback panel. The button lives in Settings rather than floating on screen. */
+export const openFeedback = () => handle?.open();
+
 export function startFeedback() {
-  initFeedback({
+  handle = initFeedback({
     app: "bench-mirror",
-    bottom: 76,
+    fab: false,
     upload: async (item) => {
       if (!isConnected()) throw new Error("not connected to Dropbox");
       try {

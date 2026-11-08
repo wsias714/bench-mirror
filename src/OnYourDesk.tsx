@@ -4,6 +4,7 @@ import { deskDone, queueAnswer, sentKey } from "./lib/inbox.ts";
 import type { Payload } from "./lib/inbox.ts";
 import type { Desk, DeskAction, DeskActions } from "./lib/snapshot.ts";
 import { DeskCard, useDraft, useSent } from "./Answer.tsx";
+import Comment, { FEEDBACK_FILES } from "./Comment.tsx";
 import type { Sender } from "./Answer.tsx";
 
 /** The PDF Bench copied into the app folder's desk/ directory, shown on the card itself. */
@@ -45,6 +46,10 @@ function Row({ a, send, can, desk }: { a: DeskAction; send: Sender; can: boolean
   };
   const decision = a.kind === "decision" && a.qid;
   const checkin = a.kind === "checkin";
+  // The survey is shown as itself, with no second chip saying the same thing; it keeps a comment box for the council.
+  if (checkin && desk?.available && desk.id === a.set) {
+    return <><DeskCard d={desk} send={send} can={can} /><div className="card"><Comment file={FEEDBACK_FILES.delivery} where="On your desk" item={a.title} /></div></>;
+  }
   return (
     <div className="card need">
       <div>{a.nudge && a.waiting_days ? <span className="chip warn">Waiting {a.waiting_days} days</span> : null} <b>{a.title}</b></div>
@@ -53,9 +58,7 @@ function Row({ a, send, can, desk }: { a: DeskAction; send: Sender; can: boolean
       {a.kind === "pdf" && (a.pdf
         ? (show ? <PdfView id={a.id} /> : <button className="wide" onClick={() => setShow(true)}>Read the PDF here</button>)
         : <div className="meta">This PDF isn't on the phone (too large, still copying, or held back). Open it on the desktop.</div>)}
-      {checkin && (desk?.available && desk.id === a.set
-        ? <DeskCard d={desk} send={send} can={can} />
-        : <div className="meta">This check-in isn't open for answers here yet.</div>)}
+      {checkin && <div className="meta">This check-in isn't open for answers here yet.</div>}
       {can && decision && (
         <>
           <input className="ans" value={text} onChange={(e) => setText(e.target.value)} placeholder="Your answer" maxLength={2000} />
@@ -64,6 +67,7 @@ function Row({ a, send, can, desk }: { a: DeskAction; send: Sender; can: boolean
       {can && !decision && !checkin && <div className="row"><button className="primary" disabled={busy} onClick={() => void go(deskDone(a.title))}>Done</button></div>}
       {!can && !checkin && <div className="meta">Connect Dropbox in Settings to respond.</div>}
       {err && <div className="err">{err}</div>}
+      <Comment file={FEEDBACK_FILES.delivery} where="On your desk" item={a.title} />
     </div>
   );
 }

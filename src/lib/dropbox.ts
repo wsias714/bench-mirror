@@ -119,6 +119,17 @@ export function dropboxRemote(): Remote {
       if (!path.startsWith("/inbox/")) throw new Error("The phone only writes under /inbox/.");
       await dbx.filesUpload({ path, contents: new Blob([text], { type: "application/json" }), mode: { ".tag": "add" }, autorename: false, mute: true });
     },
+    async readBlob(path): Promise<Blob | null> {
+      if (!path.startsWith("/desk/")) throw new Error("Only /desk/ files can be opened as a document.");
+      try {
+        const res = await dbx.filesDownload({ path });
+        const blob = (res.result as unknown as { fileBlob: Blob }).fileBlob;
+        return new Blob([blob], { type: "application/pdf" });
+      } catch (e) {
+        if (isNotFound(e)) return null;
+        throw e;
+      }
+    },
     async read(path): Promise<RemoteFile | null> {
       try {
         const res = await dbx.filesDownload({ path });

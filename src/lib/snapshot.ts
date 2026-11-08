@@ -40,7 +40,7 @@ export interface Board {
 }
 export interface Feedback { id: string; file: string; where: string; item: string; text: string; status: "open" | "answered"; answered: string; answer: string }
 export interface Surfaces { available: boolean; night?: string; ok?: boolean; surfaces?: { surface: string; ok: boolean; why: string }[] }
-export interface DeskAction { id: string; kind: "decision" | "checkin" | "pdf" | "link" | "task"; title: string; action: string; due: string; qid: string; waiting_days: number; nudge: boolean; pdf: boolean }
+export interface DeskAction { id: string; kind: "decision" | "checkin" | "pdf" | "link" | "task"; title: string; action: string; due: string; qid: string; set: string; status: string; waiting_days: number; nudge: boolean; pdf: boolean }
 export interface DeskActions { available: boolean; generated?: string; waiting?: number; items?: DeskAction[] }
 export interface Twm {
   actions?: DeskActions;

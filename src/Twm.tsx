@@ -101,7 +101,7 @@ export default function TwmView({ t, send, can }: { t: Twm; send: Sender; can: b
   return (
     <>
       <FeedbackCtx.Provider value={{ items: t.feedback ?? [], send, can }}>
-      <OnYourDesk d={t.actions} send={send} can={can} />
+      <OnYourDesk d={t.actions} send={send} can={can} desk={t.desk} />
       <TwmBoard b={t.board} surfaces={t.surfaces} />
       <div className="card">
         <div className="t">Weekly report: {t.weekly_verdict || "none in the latest digest"}</div>
@@ -129,7 +129,7 @@ export default function TwmView({ t, send, can }: { t: Twm; send: Sender; can: b
         {d?.health && <div className="meta"><b>Health:</b> {d.health}</div>}
       </div>
 
-      {t.desk?.available && <DeskCard d={t.desk} send={send} can={can} />}
+      {t.desk?.available && !t.actions?.items?.some((a) => a.kind === "checkin" && a.set === t.desk?.id) && <DeskCard d={t.desk} send={send} can={can} />}
 
       <h2>Decisions waiting on you</h2>
       {t.decisions_waiting?.map((q) => <QueueCard key={q.id} q={q} send={send} can={can} />)}

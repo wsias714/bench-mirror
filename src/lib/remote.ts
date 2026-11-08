@@ -8,4 +8,6 @@ export interface RemoteFile {
 export interface Remote {
   read(path: string): Promise<RemoteFile | null>;
   create(path: string, text: string): Promise<void>;
+  /** Read-only binary download (desk PDFs under /desk/). */
+  readBlob?(path: string): Promise<Blob | null>;
 }

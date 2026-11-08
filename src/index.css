@@ -126,3 +126,6 @@ button.wide { width: 100%; margin-top: 8px; text-align: center; }
 .fb { margin-top: 6px; } .fb-btn { min-height: 36px; font-size: 13px; padding: 4px 12px; }
 .fb-note { font-size: 13px; margin-top: 6px; padding: 6px 8px; border-left: 3px solid var(--warn); border-radius: 4px; }
 .fb-note.answered { border-left-color: var(--ok); } .fb-ans { margin-top: 4px; color: var(--muted); }
+
+.pdf { width: 100%; height: 70vh; border: 1px solid var(--line); border-radius: 6px; margin-top: 8px; background: #fff; }
+.wide-link { display: block; min-height: 44px; line-height: 44px; text-align: center; }

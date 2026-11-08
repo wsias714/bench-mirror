@@ -28,6 +28,10 @@ export const deskAnswers = (set: string, answers: Record<string, { choice: strin
 export const twmFeedback = (file: string, where: string, item: string, text: string, now = new Date(), id = uuid()): Payload =>
   ({ ...head(now, id), kind: "twm_feedback", file, where, item: item.slice(0, 200), text: text.trim() });
 
+/** Marks one "On your desk" item done: the same Done comment the desktop button files (TWM's COO applies it that night). */
+export const deskDone = (title: string, now = new Date(), id = uuid()): Payload =>
+  twmFeedback("ops/DELIVERY.md", "On your desk", title, "Done (marked from phone)", now, id);
+
 export const lpPick = (lp: string, key: string, picked: boolean, now = new Date(), id = uuid()): Payload =>
   ({ ...head(now, id), kind: "lp_pick", lp, key, picked });
 export const lpSubmit = (lp: string, plan_hash: string, now = new Date(), id = uuid()): Payload =>

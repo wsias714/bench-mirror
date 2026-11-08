@@ -1,6 +1,6 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { deskAnswers, isWaiting, lpPick, lpSubmit, pruneSent, queueAcceptDefault, queueAnswer, sendToInbox, sentKey } from "./inbox.ts";
+import { deskAnswers, deskDone, isWaiting, lpPick, lpSubmit, pruneSent, queueAcceptDefault, queueAnswer, sendToInbox, sentKey } from "./inbox.ts";
 import type { Remote } from "./remote.ts";
 
 const now = new Date("2026-10-28T20:00:00Z");
@@ -36,4 +36,8 @@ test("LP pick and submit payloads carry exactly the fields Bench's schema accept
     { v: 1, id: ID, created: "2026-10-28T20:00:00.000Z", kind: "lp_pick", lp: "LP2", key: "2026-10-25|Science", picked: true });
   assert.deepEqual(lpSubmit("LP2", "0123456789abcdef", now, ID),
     { v: 1, id: ID, created: "2026-10-28T20:00:00.000Z", kind: "lp_submit", lp: "LP2", plan_hash: "0123456789abcdef" });
+});
+
+test("Done on a desk item is a twm_feedback comment aimed at On your desk", () => {
+  assert.deepEqual(deskDone("Sign it", now, ID), { v: 1, id: ID, created: "2026-10-28T20:00:00.000Z", kind: "twm_feedback", file: "ops/DELIVERY.md", where: "On your desk", item: "Sign it", text: "Done (marked from phone)" });
 });

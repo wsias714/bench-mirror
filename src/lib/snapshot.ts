@@ -97,7 +97,7 @@ export interface Homeschool {
 }
 export interface Snapshot {
   schema: number; generated_at: string; stale_after_min: number; read_only: boolean;
-  today: { counts: { overdue: number; upcoming: number; active: number }; top: Ev[]; outstanding: Ev[] };
+  today: { counts: { overdue: number; upcoming: number; active: number }; top: Ev[]; outstanding: Ev[]; access?: string[] };
   deck: Card[]; week: Ev[]; timeline?: Timeline; twm: Twm; homeschool?: Homeschool;
   threads: { as_of: string; error: string; needs_you: number; items: Thread[] };
   inbox: { dir: string; accepts: string[]; applied: string[] };

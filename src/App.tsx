@@ -68,6 +68,7 @@ function Body({ tab, s }: { tab: Tab; s: Snapshot }) {
     return (
       <>
         <div className="stats"><b>{c.overdue}</b> overdue · <b>{c.upcoming}</b> upcoming · {c.active} active</div>
+        {s.today.access?.map((t) => <div key={t} className="stats">⚠ {t}</div>)}
         <h2>Top of the list</h2>
         {s.today.top.length ? s.today.top.map((e) => <EventRow key={e.id} e={e} />) : <Empty text="Nothing ranked today." />}
         <h2>Outstanding (oldest first)</h2>

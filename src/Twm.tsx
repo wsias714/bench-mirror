@@ -1,5 +1,6 @@
 import Comment, { FEEDBACK_FILES, FeedbackCtx } from "./Comment.tsx";
 import TwmBoard from "./TwmBoard.tsx";
+import OnYourDesk from "./OnYourDesk.tsx";
 import { DeskCard, QueueCard } from "./Answer.tsx";
 import type { Sender } from "./Answer.tsx";
 import type { Delivery, DeliveryRow, TlBullet, Timeline12, Twm } from "./lib/snapshot.ts";
@@ -100,6 +101,7 @@ export default function TwmView({ t, send, can }: { t: Twm; send: Sender; can: b
   return (
     <>
       <FeedbackCtx.Provider value={{ items: t.feedback ?? [], send, can }}>
+      <OnYourDesk d={t.actions} send={send} can={can} />
       <TwmBoard b={t.board} surfaces={t.surfaces} />
       <div className="card">
         <div className="t">Weekly report: {t.weekly_verdict || "none in the latest digest"}</div>

@@ -4,7 +4,7 @@ import Comment, { FEEDBACK_FILES } from "./Comment.tsx";
 
 type Seg = { kind: "sprint" | "month" | "quarter"; x: number; w: number; a: number; z: number; label: string; current: boolean; blocks: Record<string, BoardBlock | string | string[]> };
 const W = { sprint: 150, month: 120, quarter: 140 };
-const LH = 58, HEAD = 22;
+const LH = 76, HEAD = 24;
 const sdot = (s: string) => `sdot ${s === "on track" ? "ok" : s === "at risk" ? "warn" : s ? "bad" : "dim"}`;
 const HEALTH: Record<string, string> = { ran: "Ran last night", failed: "Failed last night", skipped: "Skipped last night", planned: "Planned only last night", missed: "Didn't run last night", none: "No runs yet" };
 

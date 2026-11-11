@@ -7,7 +7,7 @@ import {
 } from "./lib/dropbox.ts";
 import { loadCached, saveCached } from "./lib/store.ts";
 import { agoLabel, ageMinutes, dueLabel, parseSnapshot, pill } from "./lib/snapshot.ts";
-import type { Card, Ev, Snapshot, Thread } from "./lib/snapshot.ts";
+import type { Card, Ev, PassRow, Snapshot, Thread } from "./lib/snapshot.ts";
 import Timeline from "./Timeline.tsx";
 import HomeschoolView from "./Homeschool.tsx";
 import TwmView from "./Twm.tsx";
@@ -48,6 +48,20 @@ const ThreadRow = ({ t }: { t: Thread }) => (
     <div className="meta"><span className="chip">{t.project}</span>{t.status}{t.needs_you ? " · needs you" : ""}</div>
   </div>
 );
+const shortDate = (iso: string) => {
+  const d = new Date(`${iso}T12:00:00`);
+  return Number.isNaN(d.getTime()) ? "" : d.toLocaleDateString("en-US", { month: "short", day: "numeric" });
+};
+/** One line per thread the keep-moving pass started. A moved-on thread says so instead of repeating an old outcome. */
+const PassCard = ({ r }: { r: PassRow }) => (
+  <div className={`card${r.state === "needs you" ? " need" : ""}`}>
+    <div className="t">{r.title}</div>
+    <div className="meta">
+      <span className="chip">{r.state}</span>
+      {r.moved_on ? `as of ${shortDate(r.since)}; thread active since, see the email or open the thread` : r.since ? shortDate(r.since) : ""}
+    </div>
+  </div>
+);
 const Empty = ({ text }: { text: string }) => <div className="empty">{text}</div>;
 
 /** The phone's one write: a new file under inbox/. Returns "" or a message to show. */
@@ -85,6 +99,13 @@ function Body({ tab, s }: { tab: Tab; s: Snapshot }) {
       <>
         <div className="stats"><b>{s.threads.needs_you}</b> waiting on you · as of {s.threads.as_of.slice(11, 16) || "?"}</div>
         {s.threads.error && <p className="err">{s.threads.error}</p>}
+        {s.threads.pass?.length ? (
+          <>
+            <h3>Started by the keep-moving pass</h3>
+            {s.threads.pass.map((r, i) => <PassCard key={i} r={r} />)}
+            <h3>All live threads</h3>
+          </>
+        ) : null}
         {s.threads.items.length ? s.threads.items.map((t, i) => <ThreadRow key={i} t={t} />) : <Empty text="No live threads." />}
       </>
     );

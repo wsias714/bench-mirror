@@ -3,6 +3,8 @@
 export interface Ev { id: string; title: string; domain: string; due: string; days: number | null; bucket: string }
 export interface Card { id: string; kind: string; title: string; domain: string; outcome: string; created: string }
 export interface Thread { title: string; project: string; status: string; needs_you: boolean }
+/** A thread the keep-moving pass started: a fixed state word and the date it was set; no thread text. */
+export interface PassRow { title: string; state: string; since: string; moved_on: boolean }
 export interface TlItem { id: string; title: string; domain: string; due: string; days: number | null; lead: number }
 export interface Timeline { days: number; ahead: TlItem[]; overdue: TlItem[]; overdue_total: number }
 export interface HistoryRow { ts: string; ok: boolean | null; moved: number | null; plan_only: boolean; ended: string; mins: number | null; calls: number | null; cost: number | null }
@@ -99,7 +101,7 @@ export interface Snapshot {
   schema: number; generated_at: string; stale_after_min: number; read_only: boolean;
   today: { counts: { overdue: number; upcoming: number; active: number }; top: Ev[]; outstanding: Ev[]; access?: string[] };
   deck: Card[]; week: Ev[]; timeline?: Timeline; twm: Twm; homeschool?: Homeschool;
-  threads: { as_of: string; error: string; needs_you: number; items: Thread[] };
+  threads: { as_of: string; error: string; needs_you: number; items: Thread[]; pass?: PassRow[] };
   inbox: { dir: string; accepts: string[]; applied: string[] };
 }
 

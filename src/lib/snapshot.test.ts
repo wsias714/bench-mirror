@@ -10,6 +10,13 @@ const base = {
 };
 const t0 = Date.parse(base.generated_at);
 
+test("threads.pass is optional and carries keep-moving rows", () => {
+  assert.equal(parseSnapshot(JSON.stringify(base)).threads.pass, undefined);
+  const row = { title: "Sample item", state: "moved on", since: "2026-10-30", moved_on: true };
+  const s = parseSnapshot(JSON.stringify({ ...base, threads: { ...base.threads, pass: [row] } }));
+  assert.deepEqual(s.threads.pass, [row]);
+});
+
 test("parseSnapshot accepts a good file and rejects bad ones", () => {
   assert.equal(parseSnapshot(JSON.stringify(base)).schema, 1);
   assert.throws(() => parseSnapshot("{}"), /schema/);

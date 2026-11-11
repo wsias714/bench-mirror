@@ -5,6 +5,9 @@ export interface Card { id: string; kind: string; title: string; domain: string;
 export interface Thread { title: string; project: string; status: string; needs_you: boolean }
 /** A thread the keep-moving pass started: a fixed state word and the date it was set; no thread text. */
 export interface PassRow { title: string; state: string; since: string; moved_on: boolean }
+/** The briefing's numbered "Needs your OK" list: plain title, what it changes, the Chief of Staff's verdict word. Read-only. */
+export interface HkItem { n: number; title: string; change: string; verdict: string }
+export interface Housekeeping { day: string; items: HkItem[]; more: number; stale: number; fixed: number }
 export interface TlItem { id: string; title: string; domain: string; due: string; days: number | null; lead: number }
 export interface Timeline { days: number; ahead: TlItem[]; overdue: TlItem[]; overdue_total: number }
 export interface HistoryRow { ts: string; ok: boolean | null; moved: number | null; plan_only: boolean; ended: string; mins: number | null; calls: number | null; cost: number | null }
@@ -101,7 +104,7 @@ export interface Snapshot {
   schema: number; generated_at: string; stale_after_min: number; read_only: boolean;
   today: { counts: { overdue: number; upcoming: number; active: number }; top: Ev[]; outstanding: Ev[]; access?: string[] };
   deck: Card[]; week: Ev[]; timeline?: Timeline; twm: Twm; homeschool?: Homeschool;
-  threads: { as_of: string; error: string; needs_you: number; items: Thread[]; pass?: PassRow[] };
+  threads: { as_of: string; error: string; needs_you: number; items: Thread[]; pass?: PassRow[]; housekeeping?: Housekeeping | null };
   inbox: { dir: string; accepts: string[]; applied: string[] };
 }
 

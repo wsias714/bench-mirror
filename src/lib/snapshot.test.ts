@@ -17,6 +17,13 @@ test("threads.pass is optional and carries keep-moving rows", () => {
   assert.deepEqual(s.threads.pass, [row]);
 });
 
+test("threads.housekeeping is optional and carries numbered items", () => {
+  assert.equal(parseSnapshot(JSON.stringify(base)).threads.housekeeping, undefined);
+  const hk = { day: "2026-11-11", items: [{ n: 1, title: "Sample change", change: "a setting", verdict: "approve" }], more: 0, stale: 1, fixed: 2 };
+  const s = parseSnapshot(JSON.stringify({ ...base, threads: { ...base.threads, housekeeping: hk } }));
+  assert.deepEqual(s.threads.housekeeping, hk);
+});
+
 test("parseSnapshot accepts a good file and rejects bad ones", () => {
   assert.equal(parseSnapshot(JSON.stringify(base)).schema, 1);
   assert.throws(() => parseSnapshot("{}"), /schema/);

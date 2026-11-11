@@ -7,7 +7,7 @@ import {
 } from "./lib/dropbox.ts";
 import { loadCached, saveCached } from "./lib/store.ts";
 import { agoLabel, ageMinutes, dueLabel, parseSnapshot, pill } from "./lib/snapshot.ts";
-import type { Card, Ev, PassRow, Snapshot, Thread } from "./lib/snapshot.ts";
+import type { Card, Ev, Housekeeping, PassRow, Snapshot, Thread } from "./lib/snapshot.ts";
 import Timeline from "./Timeline.tsx";
 import HomeschoolView from "./Homeschool.tsx";
 import TwmView from "./Twm.tsx";
@@ -62,6 +62,22 @@ const PassCard = ({ r }: { r: PassRow }) => (
     </div>
   </div>
 );
+/** The briefing's "Needs your OK" items, same numbers as the email. Read-only: sign off by telling the Chief of Staff. */
+const HkCard = ({ h }: { h: Housekeeping }) => (
+  <>
+    <h3>AI housekeeping: needs your OK (as of {shortDate(h.day)})</h3>
+    {h.items.map((x) => (
+      <div key={x.n} className="card">
+        <div className="t">{x.n}. {x.title}</div>
+        <div className="meta"><span className="chip">{x.verdict}</span>{x.change}</div>
+      </div>
+    ))}
+    <div className="stats">
+      {h.more ? `${h.more} more waiting · ` : ""}{h.stale ? `${h.stale} outdated dropped · ` : ""}{h.fixed ? `${h.fixed} fixed overnight · ` : ""}
+      tell the Chief of Staff "approve 1, 2; reject 3"
+    </div>
+  </>
+);
 const Empty = ({ text }: { text: string }) => <div className="empty">{text}</div>;
 
 /** The phone's one write: a new file under inbox/. Returns "" or a message to show. */
@@ -99,6 +115,7 @@ function Body({ tab, s }: { tab: Tab; s: Snapshot }) {
       <>
         <div className="stats"><b>{s.threads.needs_you}</b> waiting on you · as of {s.threads.as_of.slice(11, 16) || "?"}</div>
         {s.threads.error && <p className="err">{s.threads.error}</p>}
+        {s.threads.housekeeping?.items.length ? <HkCard h={s.threads.housekeeping} /> : null}
         {s.threads.pass?.length ? (
           <>
             <h3>Started by the keep-moving pass</h3>

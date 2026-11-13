@@ -17,7 +17,7 @@ export default defineConfig({
         name: "Bench Mirror",
         short_name: "Bench",
         description: "Read-only phone view of Bench: Today, Deck, this week, TWM and threads.",
-        theme_color: "#26364f",
+        theme_color: "#2D4A6B",
         background_color: "#f4f3ef",
         display: "standalone",
         orientation: "portrait",
@@ -26,6 +26,7 @@ export default defineConfig({
         icons: [
           { src: `${base}icons/icon-192.png`, sizes: "192x192", type: "image/png", purpose: "any" },
           { src: `${base}icons/icon-512.png`, sizes: "512x512", type: "image/png", purpose: "any" },
+          { src: `${base}icons/icon-maskable-512.png`, sizes: "512x512", type: "image/png", purpose: "maskable" },
         ],
       },
       // The snapshot is fetched from Dropbox at runtime; only the app shell is precached.

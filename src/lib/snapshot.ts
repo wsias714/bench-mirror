@@ -100,10 +100,22 @@ export interface Homeschool {
   records?: { total: number; rows: HsRecord[] } | null;
   sync?: { last_ingest_at: string | null; last_attempt_at: string | null; added: number; ok: boolean; skipped: string | null };
 }
+/** State of everything (Bench `state`): one row per domain plus System. `next.title` is null for a withheld domain. Read-only. */
+export type StateColor = "red" | "amber" | "green" | "grey";
+export interface StateRow {
+  key: string; label: string; color: StateColor; why: string;
+  next: { title: string | null; due: string; days: number | null } | null;
+  overdue: number; in_window: number; ready_for_you: number; to_confirm: number;
+  last_touched: string | null; data_as_of: string | null;
+}
+export interface StateView {
+  available: boolean; generated_at?: string; rows?: StateRow[];
+  system?: { color: StateColor; why: string; checks: { name: string; ok: boolean; detail: string }[] };
+}
 export interface Snapshot {
   schema: number; generated_at: string; stale_after_min: number; read_only: boolean;
   today: { counts: { overdue: number; upcoming: number; active: number }; top: Ev[]; outstanding: Ev[]; access?: string[] };
-  deck: Card[]; week: Ev[]; timeline?: Timeline; twm: Twm; homeschool?: Homeschool;
+  deck: Card[]; week: Ev[]; timeline?: Timeline; twm: Twm; homeschool?: Homeschool; state?: StateView;
   threads: { as_of: string; error: string; needs_you: number; items: Thread[]; pass?: PassRow[]; housekeeping?: Housekeeping | null };
   inbox: { dir: string; accepts: string[]; applied: string[] };
 }
@@ -144,6 +156,21 @@ export function dueLabel(days: number | null): string {
   if (days === 0) return "today";
   return days === 1 ? "tomorrow" : `in ${days}d`;
 }
+
+/** How old the State screen's data may get before it is shown with a warning (Bench's rule: 2 hours). */
+export const STATE_WARN_MIN = 120;
+
+/** "as of HH:MM" (local time) for the State screen, and whether it is old enough to warn. Unreadable stamp: warn. */
+export function stateAsOf(s: Pick<Snapshot, "generated_at"> & { state?: { generated_at?: string } }, now = Date.now()): { label: string; warn: boolean } {
+  const t = Date.parse(s.state?.generated_at || s.generated_at);
+  if (Number.isNaN(t)) return { label: "as of unknown time", warn: true };
+  const d = new Date(t);
+  const hh = `${String(d.getHours()).padStart(2, "0")}:${String(d.getMinutes()).padStart(2, "0")}`;
+  return { label: `as of ${hh}`, warn: Math.max(0, Math.round((now - t) / 60000)) > STATE_WARN_MIN };
+}
+
+/** "3d overdue" / "in 12d" for a State row's next deadline. */
+export const stateDue = (days: number | null): string => dueLabel(days);
 
 /** What the header pill says: off / syncing / live / stale / offline cache. */
 export function pill(o: { connected: boolean; loading: boolean; error: string; snap: Snapshot | null; fromCache: boolean }, now = Date.now()): { kind: "off" | "syncing" | "ok" | "stale" | "offline" | "error"; text: string } {

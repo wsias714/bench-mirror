@@ -11,12 +11,13 @@ import type { Card, Ev, Housekeeping, PassRow, Snapshot, Thread } from "./lib/sn
 import Timeline from "./Timeline.tsx";
 import HomeschoolView from "./Homeschool.tsx";
 import TwmView from "./Twm.tsx";
+import StateView from "./State.tsx";
 import { sendToInbox } from "./lib/inbox.ts";
 import { openFeedback } from "./feedback.ts";
 import type { Payload } from "./lib/inbox.ts";
 
-type Tab = "today" | "deck" | "week" | "timeline" | "school" | "twm" | "threads";
-const TABS: [Tab, string][] = [["today", "Today"], ["deck", "Deck"], ["week", "Week"], ["timeline", "Timeline"], ["school", "School"], ["twm", "TWM"], ["threads", "Threads"]];
+type Tab = "today" | "deck" | "week" | "timeline" | "school" | "twm" | "threads" | "state";
+const TABS: [Tab, string][] = [["today", "Today"], ["deck", "Deck"], ["week", "Week"], ["timeline", "Timeline"], ["school", "School"], ["twm", "TWM"], ["threads", "Threads"], ["state", "State"]];
 
 const readCached = (): Snapshot | null => {
   const t = loadCached();
@@ -92,7 +93,8 @@ async function sendAnswer(p: Payload): Promise<string> {
   }
 }
 
-function Body({ tab, s }: { tab: Tab; s: Snapshot }) {
+function Body({ tab, s, now }: { tab: Tab; s: Snapshot; now: number }) {
+  if (tab === "state") return <StateView s={s} now={now} />;
   if (tab === "today") {
     const c = s.today.counts;
     return (
@@ -199,7 +201,7 @@ export default function App() {
           </button>
         ))}
       </nav>
-      {snap ? <Body tab={tab} s={snap} /> : <Empty text={connected ? "Loading…" : "Open Settings to connect Dropbox."} />}
+      {snap ? <Body tab={tab} s={snap} now={now} /> : <Empty text={connected ? "Loading…" : "Open Settings to connect Dropbox."} />}
       {sheet && <Settings onClose={() => setSheet(false)} onChange={() => { setConnected(isConnected()); void load(); }}
         onForget={() => { setSnap(null); setConnected(false); setError(""); setSheet(false); }} />}
     </div>

@@ -1,6 +1,6 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { ageMinutes, agoLabel, dueLabel, isStale, parseSnapshot, pill } from "./snapshot.ts";
+import { ageMinutes, agoLabel, dueLabel, isStale, parseSnapshot, pill, stateAsOf, stateDue } from "./snapshot.ts";
 
 const base = {
   schema: 1, generated_at: "2026-10-23T12:00:00+00:00", stale_after_min: 45, read_only: true,
@@ -60,4 +60,21 @@ test("pill states", () => {
   assert.equal(pill(o, t0 + 90 * 60000).kind, "stale");
   assert.equal(pill({ ...o, fromCache: true }, t0 + 10 * 60000).kind, "offline");
   assert.equal(pill({ ...o, snap: null, error: "boom" }).text, "boom");
+});
+
+test("state is optional (older snapshot) and carries rows", () => {
+  assert.equal(parseSnapshot(JSON.stringify(base)).state, undefined);
+  const state = { available: true, generated_at: base.generated_at, rows: [], system: { color: "green", why: "all checks pass", checks: [] } };
+  assert.deepEqual(parseSnapshot(JSON.stringify({ ...base, state })).state, state);
+});
+
+test("stateAsOf warns past two hours and on an unreadable stamp", () => {
+  assert.equal(stateAsOf(base, t0 + 119 * 60000).warn, false);
+  assert.equal(stateAsOf(base, t0 + 121 * 60000).warn, true);
+  assert.match(stateAsOf(base, t0).label, /^as of \d\d:\d\d$/);
+  assert.equal(stateAsOf({ generated_at: "garbage" }).warn, true);
+  const old = { ...base, state: { generated_at: "2026-10-23T08:00:00+00:00" } };
+  assert.equal(stateAsOf(old, t0).warn, true); // the state's own stamp wins
+  assert.equal(stateDue(-3), "3d overdue");
+  assert.equal(stateDue(null), "");
 });

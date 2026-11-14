@@ -127,5 +127,11 @@ button.wide { width: 100%; margin-top: 8px; text-align: center; }
 .fb-note { font-size: 13px; margin-top: 6px; padding: 6px 8px; border-left: 3px solid var(--warn); border-radius: 4px; }
 .fb-note.answered { border-left-color: var(--ok); } .fb-ans { margin-top: 4px; color: var(--muted); }
 
+/* State of everything (read-only): colour dots and the "as of" line */
+.stdot { display: inline-block; width: 12px; height: 12px; border-radius: 50%; margin-right: 8px; vertical-align: middle; background: var(--muted); }
+.stdot.red { background: var(--bad); } .stdot.amber { background: var(--warn); } .stdot.green { background: var(--ok); } .stdot.grey { opacity: .6; }
+.asof { margin: 10px 0; padding: 8px 12px; border-radius: var(--radius); border: 1px solid var(--line); font-weight: 600; font-size: 17px; }
+.asof.warn { border-color: var(--warn); background: var(--need); color: var(--bad); }
+
 .pdf { width: 100%; height: 70vh; border: 1px solid var(--line); border-radius: 6px; margin-top: 8px; background: #fff; }
 .wide-link { display: block; min-height: 44px; line-height: 44px; text-align: center; }

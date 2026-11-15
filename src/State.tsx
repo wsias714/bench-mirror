@@ -20,7 +20,7 @@ function Row({ r }: { r: StateRow }) {
           Next: {r.next.title ?? "(details withheld)"} · {r.next.days !== null && r.next.days < 0 ? <span className="bad">{stateDue(r.next.days)}</span> : stateDue(r.next.days)} · {r.next.due}
         </div>
       )}
-      {counts && <div className="meta">{counts}</div>}
+      {counts && counts !== r.why && <div className="meta">{counts}</div>}
     </div>
   );
 }

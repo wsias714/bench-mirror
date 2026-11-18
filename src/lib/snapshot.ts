@@ -114,7 +114,7 @@ export interface StateView {
   system?: { color: StateColor; why: string; checks: { name: string; ok: boolean; detail: string }[] };
 }
 /** What waits on Wade (Bench src/needs.py): the same list the 06:00 email and `cos needs` show. Read-only. */
-export interface NeedCard { id: string; kind: string; title: string; context: string; reply: string; since: string; due: string }
+export interface NeedCard { id: string; kind: string; title: string; context: string; reply: string; since: string; due: string; more?: string }
 export interface Needs { available: boolean; generated?: string; count?: number; private?: number; more?: number; unreadable?: number; items?: NeedCard[] }
 export const NEED_LABEL: Record<string, string> = {
   thread_waiting: "Thread", close_pending: "Done, not closed", twm_decision: "TWM decision", twm_desk: "TWM desk",

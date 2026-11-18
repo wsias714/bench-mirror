@@ -142,7 +142,14 @@ export default function TwmView({ t, send, can }: { t: Twm; send: Sender; can: b
       {t.decisions_council?.map((q, i) => <div className="card" key={i}><div className="meta">{q}</div></div>)}
       {!t.decisions_waiting?.length && !t.decisions_council?.length && <div className="empty">Nothing waiting on you.</div>}
       {t.decisions_recent?.length ? <details className="more"><summary>Recently settled ({t.decisions_recent.length})</summary>
-        {t.decisions_recent.map((q) => <div className="meta" key={q.id}><b>{q.id}</b> {q.status}: {q.q}</div>)}</details> : null}
+        {t.decisions_recent.slice().reverse().map((q) => (
+          <div className="card" key={q.id}>
+            <div className="t">{q.id} · {q.status}</div>
+            <div className="meta">{q.q}</div>
+            {q.body?.length ? <div className="meta">{q.body.map((b, i) => <div key={i}>{b}</div>)}</div> : null}
+            {q.answer ? <div className="meta"><b>Your answer:</b> {q.answer}</div> : null}
+            {q.meaning ? <div className="meta"><i>{q.meaning}</i></div> : null}
+          </div>))}</details> : null}
 
       {t.plan && <>
         <h2>The plan {t.plan.updated ? `· ${t.plan.updated}` : ""}</h2>

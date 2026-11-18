@@ -65,9 +65,9 @@ export interface Twm {
   };
   delivery?: Delivery;
   timeline?: Timeline12;
-  decisions_waiting?: { id: string; q: string; due: string; class?: string; default?: string; answer?: string }[];
+  decisions_waiting?: { id: string; q: string; due: string; class?: string; default?: string; answer?: string; body?: string[]; meaning?: string }[];
   desk?: Desk;
-  decisions_recent?: { id: string; status: string; q: string }[];
+  decisions_recent?: { id: string; status: string; q: string; body?: string[]; answer?: string; meaning?: string }[];
   decisions_council?: string[];
 }
 export interface HsSubject { subject: string; logged: number; scheduled: number; target: number; expected: number }

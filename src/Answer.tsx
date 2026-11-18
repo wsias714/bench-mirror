@@ -50,6 +50,8 @@ export function QueueCard({ q, send, can }: { q: NonNullable<Twm["decisions_wait
     <div className="card">
       <div className="t">{q.id} · due {q.due}{q.class === "waits" ? " · waits for you" : ""}</div>
       <div className="meta">{q.q}</div>
+      {q.body?.length ? <div className="meta">{q.body.map((b, i) => <div key={i}>{b}</div>)}</div> : null}
+      {q.meaning && !q.answer ? <div className="meta"><i>{q.meaning}</i></div> : null}
       {q.answer ? <div className="ok">{APPLIES}: {q.answer}</div>
         : waiting(key) ? <div className="meta">{WAIT}</div>
         : can ? (

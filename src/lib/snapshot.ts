@@ -113,11 +113,36 @@ export interface StateView {
   available: boolean; generated_at?: string; rows?: StateRow[];
   system?: { color: StateColor; why: string; checks: { name: string; ok: boolean; detail: string }[] };
 }
+/** What waits on Wade (Bench src/needs.py): the same list the 06:00 email and `cos needs` show. Read-only. */
+export interface NeedCard { id: string; kind: string; title: string; context: string; reply: string; since: string; due: string }
+export interface Needs { available: boolean; generated?: string; count?: number; private?: number; more?: number; unreadable?: number; items?: NeedCard[] }
+export const NEED_LABEL: Record<string, string> = {
+  thread_waiting: "Thread", close_pending: "Done, not closed", twm_decision: "TWM decision", twm_desk: "TWM desk",
+  housekeeping_ok: "Housekeeping OK", approved_stuck: "Approved, not applied", feedback_go: "Feedback: your call",
+  feedback_ship: "Feedback: ship?", burn_plan: "Burn plan",
+};
+/** "waiting 10d" from the card's since date; "" for today/yesterday or an unreadable date. */
+export function waitingLabel(since: string, now = Date.now()): string {
+  const t = Date.parse(since);
+  if (!since || Number.isNaN(t)) return "";
+  const d = Math.floor((now - t) / 86400000);
+  return d > 1 ? `waiting ${d}d` : "";
+}
+/** The one summary line under the heading: count, private count, unreadable sources. */
+export function needsSummary(n: Needs): string {
+  const bits = [`${n.count ?? 0} waiting on you`];
+  if (n.private) bits.push(`${n.private} private (in the email)`);
+  if (n.more) bits.push(`${n.more} more in the email`);
+  if (n.unreadable) bits.push(`${n.unreadable} source(s) unreadable, list may be short`);
+  return bits.join(" · ");
+}
+
 export interface Snapshot {
   schema: number; generated_at: string; stale_after_min: number; read_only: boolean;
   today: { counts: { overdue: number; upcoming: number; active: number }; top: Ev[]; outstanding: Ev[]; access?: string[] };
   deck: Card[]; week: Ev[]; timeline?: Timeline; twm: Twm; homeschool?: Homeschool; state?: StateView;
   threads: { as_of: string; error: string; needs_you: number; items: Thread[]; pass?: PassRow[]; housekeeping?: Housekeeping | null };
+  needs?: Needs;
   inbox: { dir: string; accepts: string[]; applied: string[] };
 }
 

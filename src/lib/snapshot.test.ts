@@ -78,3 +78,16 @@ test("stateAsOf warns past two hours and on an unreadable stamp", () => {
   assert.equal(stateDue(-3), "3d overdue");
   assert.equal(stateDue(null), "");
 });
+
+import { needsSummary, waitingLabel } from "./snapshot.ts";
+test("needs summary names private and unreadable counts", () => {
+  assert.equal(needsSummary({ available: true, count: 10, private: 1, more: 0, unreadable: 0 }), "10 waiting on you · 1 private (in the email)");
+  assert.equal(needsSummary({ available: true, count: 0 }), "0 waiting on you");
+  assert.match(needsSummary({ available: true, count: 3, unreadable: 1 }), /unreadable, list may be short/);
+});
+test("waiting label counts whole days from since", () => {
+  const now = Date.parse("2026-11-18T09:00:00");
+  assert.equal(waitingLabel("2026-11-08", now), "waiting 10d");
+  assert.equal(waitingLabel("2026-11-18", now), "");
+  assert.equal(waitingLabel("", now), "");
+});

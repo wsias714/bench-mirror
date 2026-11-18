@@ -32,7 +32,7 @@ function EventRow({ e }: { e: Ev }) {
   return (
     <div className="card">
       <div className="t">{e.title}</div>
-      <div className="meta"><span className="chip">{e.domain}</span>{e.days !== null && e.days < 0 ? <span className="bad">{dueLabel(e.days)}</span> : dueLabel(e.days)} · {e.due}</div>
+      <div className="meta"><span className="chip">{e.domain}</span>{e.days !== null && e.days < 0 ? <span className="bad">{dueLabel(e.days)}</span> : dueLabel(e.days)} · {e.due}{e.notes ? <span className="chip" title="Progress notes (read-only here)">{` ${e.notes} note${e.notes > 1 ? "s" : ""} · ${e.noted ?? ""}`}</span> : null}</div>
     </div>
   );
 }

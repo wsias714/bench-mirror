@@ -1,7 +1,7 @@
 /* The snapshot Bench writes (src/mirror.py, schema 1) and the pure helpers the UI uses.
    Kept free of browser imports so it runs under `node --test`. */
 export interface Ev { id: string; title: string; domain: string; due: string; days: number | null; bucket: string; notes?: number; noted?: string; note_list?: { at: string; by: string; text: string }[]; respaced_from?: string }
-export interface Card { id: string; kind: string; title: string; domain: string; outcome: string; created: string }
+export interface Card { id: string; kind: string; title: string; domain: string; outcome: string; created: string; will?: string }
 export interface Thread { title: string; project: string; status: string; needs_you: boolean }
 /** A thread the keep-moving pass started: a fixed state word and the date it was set; no thread text. */
 export interface PassRow { title: string; state: string; since: string; moved_on: boolean }
@@ -119,7 +119,7 @@ export interface Needs { available: boolean; generated?: string; count?: number;
 export const NEED_LABEL: Record<string, string> = {
   thread_waiting: "Thread", close_pending: "Done, not closed", twm_decision: "TWM decision", twm_desk: "TWM desk",
   housekeeping_ok: "Housekeeping OK", approved_stuck: "Approved, not applied", feedback_go: "Feedback: your call",
-  feedback_ship: "Feedback: ship?", burn_plan: "Burn plan",
+  feedback_ship: "Feedback: ship?", burn_plan: "Burn plan", deck: "Deck card",
 };
 /** "waiting 10d" from the card's since date; "" for today/yesterday or an unreadable date. */
 export function waitingLabel(since: string, now = Date.now()): string {

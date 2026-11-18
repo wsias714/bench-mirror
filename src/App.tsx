@@ -43,6 +43,7 @@ const CardRow = ({ c }: { c: Card }) => (
   <div className="card">
     <div className="t">{c.title}</div>
     <div className="meta"><span className="chip">{c.outcome || c.kind}</span>{c.domain} · {c.created}</div>
+    {c.will ? <div className="meta">Approving will: {c.will}</div> : null}
   </div>
 );
 const ThreadRow = ({ t }: { t: Thread }) => (

@@ -11,6 +11,8 @@ import type { Card, Ev, Housekeeping, PassRow, Snapshot, Thread } from "./lib/sn
 import HomeschoolView from "./Homeschool.tsx";
 import TwmView from "./Twm.tsx";
 import StateView from "./State.tsx";
+import CardNotes from "./CardNotes.tsx";
+import type { Sender } from "./Answer.tsx";
 import { sendToInbox } from "./lib/inbox.ts";
 import { openFeedback } from "./feedback.ts";
 import type { Payload } from "./lib/inbox.ts";
@@ -28,11 +30,12 @@ const readCached = (): Snapshot | null => {
   }
 };
 
-function EventRow({ e }: { e: Ev }) {
+function EventRow({ e, send, can }: { e: Ev; send: Sender; can: boolean }) {
   return (
     <div className="card">
       <div className="t">{e.title}</div>
-      <div className="meta"><span className="chip">{e.domain}</span>{e.days !== null && e.days < 0 ? <span className="bad">{dueLabel(e.days)}</span> : dueLabel(e.days)} · {e.due}{e.notes ? <span className="chip" title="Progress notes (read-only here)">{` ${e.notes} note${e.notes > 1 ? "s" : ""} · ${e.noted ?? ""}`}</span> : null}</div>
+      <div className="meta"><span className="chip">{e.domain}</span>{e.days !== null && e.days < 0 ? <span className="bad">{dueLabel(e.days)}</span> : dueLabel(e.days)} · {e.due}{e.respaced_from ? ` (moved from ${e.respaced_from})` : ""}</div>
+      <CardNotes e={e} send={send} can={can} />
     </div>
   );
 }
@@ -101,14 +104,14 @@ function Body({ tab, s, now }: { tab: Tab; s: Snapshot; now: number }) {
         <div className="stats"><b>{c.overdue}</b> overdue · <b>{c.upcoming}</b> upcoming · {c.active} active</div>
         {s.today.access?.map((t) => <div key={t} className="stats">⚠ {t}</div>)}
         <h2>Top of the list</h2>
-        {s.today.top.length ? s.today.top.map((e) => <EventRow key={e.id} e={e} />) : <Empty text="Nothing ranked today." />}
+        {s.today.top.length ? s.today.top.map((e) => <EventRow key={e.id} e={e} send={sendAnswer} can={isConnected()} />) : <Empty text="Nothing ranked today." />}
         <h2>Outstanding (oldest first)</h2>
-        {s.today.outstanding.length ? s.today.outstanding.map((e) => <EventRow key={e.id} e={e} />) : <Empty text="Nothing overdue." />}
+        {s.today.outstanding.length ? s.today.outstanding.map((e) => <EventRow key={e.id} e={e} send={sendAnswer} can={isConnected()} />) : <Empty text="Nothing overdue." />}
       </>
     );
   }
   if (tab === "deck") return s.deck.length ? <>{s.deck.map((c) => <CardRow key={c.id} c={c} />)}</> : <Empty text="Deck is clear." />;
-  if (tab === "week") return s.week.length ? <>{s.week.map((e) => <EventRow key={e.id} e={e} />)}</> : <Empty text="No deadlines in the next 7 days." />;
+  if (tab === "week") return s.week.length ? <>{s.week.map((e) => <EventRow key={e.id} e={e} send={sendAnswer} can={isConnected()} />)}</> : <Empty text="No deadlines in the next 7 days." />;
   if (tab === "school") return <HomeschoolView h={s.homeschool} send={sendAnswer} can={isConnected()} />;
   if (tab === "threads") {
     return (

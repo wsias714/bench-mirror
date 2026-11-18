@@ -1,6 +1,6 @@
 /* The snapshot Bench writes (src/mirror.py, schema 1) and the pure helpers the UI uses.
    Kept free of browser imports so it runs under `node --test`. */
-export interface Ev { id: string; title: string; domain: string; due: string; days: number | null; bucket: string; notes?: number; noted?: string }
+export interface Ev { id: string; title: string; domain: string; due: string; days: number | null; bucket: string; notes?: number; noted?: string; note_list?: { at: string; by: string; text: string }[]; respaced_from?: string }
 export interface Card { id: string; kind: string; title: string; domain: string; outcome: string; created: string }
 export interface Thread { title: string; project: string; status: string; needs_you: boolean }
 /** A thread the keep-moving pass started: a fixed state word and the date it was set; no thread text. */

@@ -1,6 +1,6 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { deskAnswers, deskDone, isWaiting, lpPick, lpSubmit, pruneSent, queueAcceptDefault, queueAnswer, sendToInbox, sentKey } from "./inbox.ts";
+import { deskAnswers, deskDone, itemNote, isWaiting, lpPick, lpSubmit, pruneSent, queueAcceptDefault, queueAnswer, sendToInbox, sentKey } from "./inbox.ts";
 import type { Remote } from "./remote.ts";
 
 const now = new Date("2026-10-28T20:00:00Z");
@@ -40,4 +40,10 @@ test("LP pick and submit payloads carry exactly the fields Bench's schema accept
 
 test("Done on a desk item is a twm_feedback comment aimed at On your desk", () => {
   assert.deepEqual(deskDone("Sign it", now, ID), { v: 1, id: ID, created: "2026-10-28T20:00:00.000Z", kind: "twm_feedback", file: "ops/DELIVERY.md", where: "On your desk", item: "Sign it", text: "Done (marked from phone)" });
+});
+
+test("a card note is the exact item_note payload Bench validates", () => {
+  assert.deepEqual(itemNote("abcdef0123", "  Asked 3 contractors  ", now, ID),
+    { v: 1, id: ID, created: "2026-10-28T20:00:00.000Z", kind: "item_note", item: "abcdef0123", text: "Asked 3 contractors" });
+  assert.equal((itemNote("abcdef0123", "x".repeat(2000), now, ID) as { text: string }).text.length, 1000);
 });

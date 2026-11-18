@@ -53,6 +53,7 @@ export interface Twm {
   available: boolean; as_of?: string; running?: boolean; paused?: boolean;
   failures?: { consecutive: number | null; stop_after: number | null }; builds?: boolean; model?: string;
   last_run?: { ts: string; ok: boolean | null; moved?: number | null; ended: string }; next_run?: string;
+  night?: { level: string; line: string };
   digest?: { title: string; health: string; moved: string[]; by_role?: Record<string, string[]>; next?: string[]; notices?: string[] };
   weekly_verdict?: string;
   plan?: { updated: string; goal: string; standing: string[] };

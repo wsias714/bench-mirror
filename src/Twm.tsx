@@ -101,6 +101,12 @@ export default function TwmView({ t, send, can }: { t: Twm; send: Sender; can: b
   return (
     <>
       <FeedbackCtx.Provider value={{ items: t.feedback ?? [], send, can }}>
+      {t.night?.line && (
+        <div className="card">
+          <div className="t">TWM last night</div>
+          <div className={["failed", "stopped", "missed"].includes(t.night.level) ? "meta bad" : "meta"}>{t.night.line}</div>
+        </div>
+      )}
       <OnYourDesk d={t.actions} send={send} can={can} desk={t.desk} />
       <TwmBoard b={t.board} surfaces={t.surfaces} />
       <div className="card">

@@ -6,8 +6,8 @@ import {
   isAuthError, isConnected, isScopeError, setAppKey, signOut, startAuth,
 } from "./lib/dropbox.ts";
 import { loadCached, saveCached } from "./lib/store.ts";
-import { agoLabel, ageMinutes, dueLabel, NEED_LABEL, needsSummary, parseSnapshot, pill, tabBadge, waitingLabel } from "./lib/snapshot.ts";
-import type { Card, Ev, Housekeeping, Needs, PassRow, Snapshot, Thread } from "./lib/snapshot.ts";
+import { agoLabel, ageMinutes, dueLabel, NEED_LABEL, needsSummary, parseSnapshot, pill, splitNeeds, tabBadge, waitingLabel } from "./lib/snapshot.ts";
+import type { Card, Ev, Housekeeping, NeedCard, Needs, PassRow, Snapshot, Thread } from "./lib/snapshot.ts";
 import HomeschoolView from "./Homeschool.tsx";
 import TwmView from "./Twm.tsx";
 import StateView from "./State.tsx";
@@ -84,12 +84,8 @@ const HkCard = ({ h }: { h: Housekeeping }) => (
 );
 const Empty = ({ text }: { text: string }) => <div className="empty">{text}</div>;
 /** The morning's one list (same cards, same order as the email): what it is, why it waits, the one reply. Read-only. */
-const NeedsBlock = ({ n, now }: { n: Needs; now: number }) => (
-  <>
-    <h2>Needs you</h2>
-    <div className="stats">{needsSummary(n)}</div>
-    {(n.items ?? []).map((c) => (
-      <div key={c.id} className="card need">
+const NeedCardRow = ({ c, now, reply }: { c: NeedCard; now: number; reply: boolean }) => (
+      <div className="card need">
         <div className="t">{c.title}</div>
         <div className="meta"><span className="chip">{NEED_LABEL[c.kind] ?? c.kind}</span>{waitingLabel(c.since, now)}{c.due ? ` · due ${c.due}` : ""}</div>
         {c.more ? (
@@ -98,12 +94,28 @@ const NeedsBlock = ({ n, now }: { n: Needs; now: number }) => (
             <div className="meta">{c.more}</div>
           </details>
         ) : c.context ? <div className="meta">{c.context}</div> : null}
-        {c.reply ? <div className="meta"><b>→</b> {c.reply}</div> : null}
+        {reply && c.reply ? <div className="meta"><b>→</b> {c.reply}</div> : null}
       </div>
-    ))}
-    {!(n.items ?? []).length && !n.private ? <Empty text="Nothing waits on you." /> : null}
-  </>
 );
+/** His items on top; the system's own upkeep under one collapsed row, each kind's reply once (REVIEW-nav 2). */
+const NeedsBlock = ({ n, now }: { n: Needs; now: number }) => {
+  const { life, upkeep, groups } = splitNeeds(n);
+  return (
+    <>
+      <h2>Needs you</h2>
+      <div className="stats">{needsSummary(n)}</div>
+      {life.map((c) => <NeedCardRow key={c.id} c={c} now={now} reply />)}
+      {upkeep.length ? (
+        <details className="need-upkeep">
+          <summary className="meta"><b>System upkeep ({upkeep.length})</b> · the machine's own housekeeping</summary>
+          {groups.map((g) => <div key={g.kind} className="meta"><span className="chip">{NEED_LABEL[g.kind] ?? g.kind}{g.count > 1 ? ` ×${g.count}` : ""}</span><b>→</b> {g.reply}</div>)}
+          {upkeep.map((c) => <NeedCardRow key={c.id} c={c} now={now} reply={!groups.length} />)}
+        </details>
+      ) : null}
+      {!(n.items ?? []).length && !n.private ? <Empty text="Nothing waits on you." /> : null}
+    </>
+  );
+};
 
 /** The phone's one write: a new file under inbox/. Returns "" or a message to show. */
 async function sendAnswer(p: Payload): Promise<string> {

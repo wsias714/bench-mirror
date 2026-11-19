@@ -103,3 +103,13 @@ test("tab badges come from the one Needs list, threads fall back to the thread c
   assert.equal(tabBadge({ ...base, needs: { available: false } }, "twm"), 0);
   assert.equal(tabBadge(null, "twm"), 0);
 });
+
+import { splitNeeds } from "./snapshot.ts";
+test("needs split into his items and system upkeep; an old snapshot is all life", () => {
+  const it = (id: string, group?: string) => ({ id, kind: "k", title: id, context: "", reply: "r", since: "", due: "", group });
+  const s = splitNeeds({ available: true, items: [it("a", "life"), it("b", "upkeep"), it("c")], upkeep: [{ kind: "k", count: 1, reply: "x" }] });
+  assert.deepEqual(s.life.map((c) => c.id), ["a", "c"]);
+  assert.deepEqual(s.upkeep.map((c) => c.id), ["b"]);
+  assert.equal(s.groups.length, 1);
+  assert.deepEqual(splitNeeds({ available: true }), { life: [], upkeep: [], groups: [] });
+});

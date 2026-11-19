@@ -115,7 +115,14 @@ export interface StateView {
 }
 /** What waits on Wade (Bench src/needs.py): the same list the 06:00 email and `cos needs` show. Read-only. */
 export interface NeedCard { id: string; kind: string; title: string; context: string; reply: string; since: string; due: string; more?: string; tab?: string; group?: string }
-export interface Needs { available: boolean; generated?: string; count?: number; private?: number; more?: number; unreadable?: number; items?: NeedCard[]; by_tab?: Record<string, number> }
+export interface Needs { available: boolean; generated?: string; count?: number; private?: number; more?: number; unreadable?: number; items?: NeedCard[]; by_tab?: Record<string, number>; upkeep?: UpkeepGroup[] }
+/** System upkeep (Bench REVIEW-nav proposal 2): per kind a count and the one shared reply. */
+export interface UpkeepGroup { kind: string; count: number; reply: string }
+/** His items first; the system's own upkeep collapsed below, each kind's reply said once. */
+export function splitNeeds(n: Needs): { life: NeedCard[]; upkeep: NeedCard[]; groups: UpkeepGroup[] } {
+  const items = n.items ?? [];
+  return { life: items.filter((c) => c.group !== "upkeep"), upkeep: items.filter((c) => c.group === "upkeep"), groups: n.upkeep ?? [] };
+}
 /** Tab-bar badge from the one Needs list (Bench REVIEW-nav proposal 1): Today counts every card, other tabs the cards
  * acted on there. An older snapshot without by_tab keeps the old Threads badge. */
 export function tabBadge(s: Pick<Snapshot, "threads" | "needs"> | null, tab: string): number {

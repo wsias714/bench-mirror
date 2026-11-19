@@ -119,6 +119,8 @@ export interface NeedCard {
   notes?: number; noted?: string; note_list?: { at: string; by: string; text: string }[];
   /** The checklist's buttons (Bench src/needs_act.py): fixed label and what it does. */
   actions?: NeedAction[];
+  /** The card's version (a short hash); sent back with a choice so a changed card is not acted on blindly. */
+  fp?: string;
   /** Chosen days ago but still listed (stuck), or a last try that did not go through. */
   decided?: { at: string; label: string }; last_try?: { at: string; label: string; message: string };
 }

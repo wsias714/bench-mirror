@@ -16,7 +16,7 @@ export default function NeedActions({ c, send, can }: { c: NeedCard; send: Sende
   const key = sentKey("d", "act", c.id);
   const go = async (action: "approve" | "deny") => {
     setBusy(true); setErr("");
-    const m = await send(needAct(c.id, action, note));
+    const m = await send(needAct(c.id, action, note, c.fp ?? ""));
     setBusy(false);
     if (m) setErr(m); else { mark(key); clear(); }
   };

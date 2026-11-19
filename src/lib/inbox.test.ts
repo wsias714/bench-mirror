@@ -49,7 +49,7 @@ test("a card note is the exact item_note payload Bench validates", () => {
 });
 
 test("a checklist choice carries exactly card, action and note", () => {
-  assert.deepEqual(needAct("abcdef0123", "deny", "  not now  ", now, ID),
-    { v: 1, id: ID, created: "2026-10-28T20:00:00.000Z", kind: "need_act", card: "abcdef0123", action: "deny", note: "not now" });
-  assert.equal((needAct("abcdef0123", "approve", "x".repeat(2000), now, ID) as { note: string }).note.length, 1000);
+  assert.deepEqual(needAct("abcdef0123", "deny", "  not now  ", "0123456789ab", now, ID),
+    { v: 1, id: ID, created: "2026-10-28T20:00:00.000Z", kind: "need_act", card: "abcdef0123", action: "deny", note: "not now", fp: "0123456789ab" });
+  assert.equal((needAct("abcdef0123", "approve", "x".repeat(2000), "", now, ID) as { note: string }).note.length, 1000);
 });

@@ -184,8 +184,10 @@ export default function App() {
   const [tab, setTab] = useState<Tab>(() => openingTab(needsOf(snap)));
   const snapRef = useRef(snap);
   snapRef.current = snap;
-  // True from an open or a return to the app until the first load after it settles the tab (or he picks one).
+  // Armed by an open or a return to the app; only the load started after it may settle the tab, and only by moving
+  // to Today (never away from where he is), unless he picks a tab first.
   const resuming = useRef(true);
+  const picked = useRef(false);
   const [fromCache, setFromCache] = useState(true);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
@@ -196,13 +198,15 @@ export default function App() {
   const load = useCallback(async () => {
     if (!isConnected()) return;
     setLoading(true);
+    const settle = resuming.current;
+    resuming.current = false;
     try {
       const f = await dropboxRemote().read(SNAPSHOT_PATH);
       if (!f) throw new Error("No snapshot.json in the app folder yet. Bench writes one every 15 minutes.");
       const parsed = parseSnapshot(f.text);
       saveCached(f.text);
       setSnap(parsed);
-      if (resuming.current) { resuming.current = false; setTab(openingTab(needsOf(parsed))); }
+      if (settle && !picked.current && openingTab(needsOf(parsed)) === TABS[0][0]) setTab(TABS[0][0]);
       setFromCache(false);
       setError("");
     } catch (e) {
@@ -226,6 +230,7 @@ export default function App() {
     const onVis = () => {
       if (document.visibilityState === "visible") {
         resuming.current = true;
+        picked.current = false;
         void load();
       } else {
         try {
@@ -242,7 +247,7 @@ export default function App() {
   }, [load]);
 
   const p = pill({ connected, loading, error, snap, fromCache }, now);
-  const pick = (t: Tab) => { resuming.current = false; setTab(t); try { localStorage.setItem("bm-tab", t); } catch { /* ignore */ } };
+  const pick = (t: Tab) => { picked.current = true; setTab(t); try { localStorage.setItem("bm-tab", t); } catch { /* ignore */ } };
 
   return (
     <div className="app">

@@ -80,7 +80,7 @@ export default function OnYourDesk({ d, send, can, desk }: { d?: DeskActions; se
   return (
     <>
       <h2>On your desk</h2>
-      <div className="meta">{items.length} waiting on you{d.waiting ? ` · ${d.waiting} for 2+ days` : ""}{d.hidden_private ? ` · ${d.hidden_private} more about your own private data, on the desktop` : ""}</div>
+      <div className="meta">{items.length} waiting on you{d.waiting ? ` · ${d.waiting} for 2+ days` : ""}{d.hidden_private ? ` · ${d.hidden_private} more on the desktop` : ""}</div>
       {items.length ? items.map((a) => <Row key={a.id} a={a} send={send} can={can} desk={desk} />) : <div className="empty">Nothing needs you. TWM will put anything new here.</div>}
     </>
   );

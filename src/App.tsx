@@ -7,7 +7,7 @@ import {
 } from "./lib/dropbox.ts";
 import { loadCached, saveCached } from "./lib/store.ts";
 import { startTab } from "./lib/tabs.ts";
-import { agoLabel, ageMinutes, dueLabel, NEED_LABEL, needsSummary, parseSnapshot, pill, splitNeeds, tabBadge, waitingLabel } from "./lib/snapshot.ts";
+import { agoLabel, ageMinutes, dueLabel, NEED_LABEL, needsSummary, parseSnapshot, todayMore, pill, splitNeeds, tabBadge, waitingLabel } from "./lib/snapshot.ts";
 import type { Card, Ev, Housekeeping, NeedCard, Needs, PassRow, Snapshot, Thread } from "./lib/snapshot.ts";
 import HomeschoolView from "./Homeschool.tsx";
 import TwmView from "./Twm.tsx";
@@ -141,8 +141,9 @@ function Body({ tab, s, now }: { tab: Tab; s: Snapshot; now: number }) {
         {s.today.access?.map((t) => <div key={t} className="stats">⚠ {t}</div>)}
         <h2>Top of the list</h2>
         {s.today.top.length ? s.today.top.map((e) => <EventRow key={e.id} e={e} send={sendAnswer} can={isConnected()} />) : <Empty text="Nothing ranked today." />}
-        <h2>Outstanding (oldest first)</h2>
-        {s.today.outstanding.length ? s.today.outstanding.map((e) => <EventRow key={e.id} e={e} send={sendAnswer} can={isConnected()} />) : <Empty text="Nothing overdue." />}
+        <h2>Remaining (oldest first)</h2>
+        {s.today.outstanding.length ? s.today.outstanding.map((e) => <EventRow key={e.id} e={e} send={sendAnswer} can={isConnected()} />) : <Empty text="Nothing else waiting." />}
+        {todayMore(s.today) ? <div className="stats">{todayMore(s.today)}</div> : null}
       </>
     );
   }

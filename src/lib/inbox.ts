@@ -14,6 +14,7 @@ export type Payload =
   | { v: 1; id: string; kind: "lp_submit"; created: string; lp: string; plan_hash: string }
   | { v: 1; id: string; kind: "twm_desk"; created: string; set: string; answers: Record<string, { choice: string; note: string }> }
   | { v: 1; id: string; kind: "item_note"; created: string; item: string; text: string }
+  | { v: 1; id: string; kind: "need_act"; created: string; card: string; action: "approve" | "deny"; note: string }
   | { v: 1; id: string; kind: "feedback"; created: string; app: "bench-mirror"; fkind: "bug" | "idea" | "other"; fversion: string; text: string };
 
 const uuid = () => (globalThis.crypto as Crypto).randomUUID();
@@ -36,6 +37,11 @@ export const deskDone = (title: string, now = new Date(), id = uuid()): Payload 
 /** A progress note on one card; `item` is the opaque card id from the snapshot. Bench caps it at 1000 characters. */
 export const itemNote = (item: string, text: string, now = new Date(), id = uuid()): Payload =>
   ({ ...head(now, id), kind: "item_note", item, text: text.trim().slice(0, 1000) });
+
+/** Wade's checklist (Bench E1): approve or deny one Needs card, with an optional comment. `card` is the opaque card id
+    from the snapshot; Bench re-derives the list and applies it through the same code as the desktop buttons. */
+export const needAct = (card: string, action: "approve" | "deny", note = "", now = new Date(), id = uuid()): Payload =>
+  ({ ...head(now, id), kind: "need_act", card, action, note: note.trim().slice(0, 1000) });
 
 export const lpPick = (lp: string, key: string, picked: boolean, now = new Date(), id = uuid()): Payload =>
   ({ ...head(now, id), kind: "lp_pick", lp, key, picked });

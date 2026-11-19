@@ -7,12 +7,13 @@ import {
 } from "./lib/dropbox.ts";
 import { loadCached, saveCached } from "./lib/store.ts";
 import { startTab } from "./lib/tabs.ts";
-import { agoLabel, ageMinutes, dueLabel, NEED_LABEL, needsSummary, parseSnapshot, todayMore, pill, splitNeeds, tabBadge, waitingLabel } from "./lib/snapshot.ts";
+import { agoLabel, ageMinutes, decisionLine, dueLabel, NEED_LABEL, needsSummary, parseSnapshot, todayMore, pill, splitNeeds, tabBadge, waitingLabel } from "./lib/snapshot.ts";
 import type { Card, Ev, Housekeeping, NeedCard, Needs, PassRow, Snapshot, Thread } from "./lib/snapshot.ts";
 import HomeschoolView from "./Homeschool.tsx";
 import TwmView from "./Twm.tsx";
 import StateView from "./State.tsx";
 import CardNotes from "./CardNotes.tsx";
+import NeedActions from "./NeedActions.tsx";
 import type { Sender } from "./Answer.tsx";
 import { sendToInbox } from "./lib/inbox.ts";
 import { openFeedback } from "./feedback.ts";
@@ -95,7 +96,8 @@ const NeedCardRow = ({ c, now, reply }: { c: NeedCard; now: number; reply: boole
             <div className="meta">{c.more}</div>
           </details>
         ) : c.context ? <div className="meta">{c.context}</div> : null}
-        {reply && c.reply ? <div className="meta"><b>→</b> {c.reply}</div> : null}
+        {reply && c.reply && !(c.actions ?? []).length ? <div className="meta"><b>→</b> {c.reply}</div> : null}
+        <NeedActions c={c} send={sendAnswer} can={isConnected()} />
         {/* notes on this card from the desk (read only here); the 05:15 pass reads them too */}
         <CardNotes e={c} send={sendAnswer} can={isConnected()} />
       </div>
@@ -116,6 +118,12 @@ const NeedsBlock = ({ n, now }: { n: Needs; now: number }) => {
         </details>
       ) : null}
       {!(n.items ?? []).length && !n.private ? <Empty text="Nothing waits on you." /> : null}
+      {n.decided?.length ? (
+        <details className="need-upkeep">
+          <summary className="meta"><b>Your recent choices ({n.decided.length})</b> · from the phone or the desk, last 7 days</summary>
+          {n.decided.map((d, i) => <div key={i} className={d.ok ? "meta" : "err"}>{d.at.slice(5, 10)} · {d.by} · {decisionLine(d)}</div>)}
+        </details>
+      ) : null}
     </>
   );
 };

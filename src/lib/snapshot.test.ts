@@ -79,7 +79,7 @@ test("stateAsOf warns past two hours and on an unreadable stamp", () => {
   assert.equal(stateDue(null), "");
 });
 
-import { needsSummary, todayMore, waitingLabel } from "./snapshot.ts";
+import { decisionLine, needsSummary, todayMore, waitingLabel } from "./snapshot.ts";
 test("needs summary counts private cards in 'more', with no private tag (Wade 2026-11-18)", () => {
   assert.equal(needsSummary({ available: true, count: 10, private: 1, more: 0, unreadable: 0 }), "10 waiting on you · 1 more in the email");
   assert.equal(needsSummary({ available: true, count: 10, private: 2, more: 3 }), "10 waiting on you · 5 more in the email");
@@ -90,7 +90,8 @@ test("needs summary counts private cards in 'more', with no private tag (Wade 20
 test("waiting label counts whole days from since", () => {
   const now = Date.parse("2026-11-18T09:00:00");
   assert.equal(waitingLabel("2026-11-08", now), "waiting 10d");
-  assert.equal(waitingLabel("2026-11-18", now), "");
+  assert.equal(waitingLabel("2026-11-18", now), "new today");
+  assert.equal(waitingLabel("2026-11-17", now), "since yesterday");
   assert.equal(waitingLabel("", now), "");
 });
 
@@ -120,4 +121,9 @@ test("Today's 'more on the desktop' line counts the rest and the private rows, u
   assert.equal(todayMore({ more: 2, hidden: 3 }), "5 more on the desktop");
   assert.equal(todayMore({}), "");
   assert.equal(todayMore({ hidden: 1 }), "1 more on the desktop");
+});
+
+test("a recent choice says whether it applied, and why not", () => {
+  assert.equal(decisionLine({ title: "Garden idea", label: "Build it", by: "phone", at: "2026-11-19T09:00", ok: true, message: "" }), "Build it · Garden idea · applied");
+  assert.equal(decisionLine({ title: "Fix", label: "Approve", by: "desk", at: "", ok: false, message: "the file changed" }), "Approve · Fix · did not apply: the file changed");
 });

@@ -114,8 +114,18 @@ export interface StateView {
   system?: { color: StateColor; why: string; checks: { name: string; ok: boolean; detail: string }[] };
 }
 /** What waits on Wade (Bench src/needs.py): the same list the 06:00 email and `cos needs` show. Read-only. */
-export interface NeedCard { id: string; kind: string; title: string; context: string; reply: string; since: string; due: string; more?: string; tab?: string; group?: string; notes?: number; noted?: string; note_list?: { at: string; by: string; text: string }[] }
-export interface Needs { available: boolean; generated?: string; count?: number; private?: number; more?: number; unreadable?: number; items?: NeedCard[]; by_tab?: Record<string, number>; upkeep?: UpkeepGroup[] }
+export interface NeedCard {
+  id: string; kind: string; title: string; context: string; reply: string; since: string; due: string; more?: string; tab?: string; group?: string;
+  notes?: number; noted?: string; note_list?: { at: string; by: string; text: string }[];
+  /** The checklist's buttons (Bench src/needs_act.py): fixed label and what it does. */
+  actions?: NeedAction[];
+  /** Chosen days ago but still listed (stuck), or a last try that did not go through. */
+  decided?: { at: string; label: string }; last_try?: { at: string; label: string; message: string };
+}
+export interface NeedAction { do: "approve" | "deny"; label: string; effect: string }
+/** One of Wade's recent choices, from either screen, and whether it applied. */
+export interface Decision { title: string; label: string; by: string; at: string; ok: boolean; message: string }
+export interface Needs { available: boolean; generated?: string; count?: number; private?: number; more?: number; unreadable?: number; items?: NeedCard[]; by_tab?: Record<string, number>; upkeep?: UpkeepGroup[]; decided?: Decision[] }
 /** System upkeep (Bench REVIEW-nav proposal 2): per kind a count and the one shared reply. */
 export interface UpkeepGroup { kind: string; count: number; reply: string }
 /** His items first; the system's own upkeep collapsed below, each kind's reply said once. */
@@ -136,12 +146,17 @@ export const NEED_LABEL: Record<string, string> = {
   housekeeping_ok: "Housekeeping OK", approved_stuck: "Approved, not applied", feedback_go: "Feedback: your call",
   feedback_ship: "Feedback: ship?", burn_plan: "Burn plan", deck: "Deck card", feedback_route: "Feedback route",
 };
-/** "waiting 10d" from the card's since date; "" for today/yesterday or an unreadable date. */
+/** The card's age from its since date (Bench E1: every card shows its age): "new today", "since yesterday",
+    "waiting 10d"; "" for an unreadable date. */
 export function waitingLabel(since: string, now = Date.now()): string {
   const t = Date.parse(since);
   if (!since || Number.isNaN(t)) return "";
   const d = Math.floor((now - t) / 86400000);
-  return d > 1 ? `waiting ${d}d` : "";
+  return d > 1 ? `waiting ${d}d` : d === 1 ? "since yesterday" : "new today";
+}
+/** One line per recent choice: "Build it · Garden idea · applied" or "... · did not apply: reason". */
+export function decisionLine(d: Decision): string {
+  return `${d.label} · ${d.title} · ${d.ok ? "applied" : `did not apply: ${d.message}`}`;
 }
 /** The one summary line under the heading: count, private count, unreadable sources. */
 export function needsSummary(n: Needs): string {

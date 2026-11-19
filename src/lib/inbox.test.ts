@@ -1,6 +1,6 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { deskAnswers, deskDone, itemNote, isWaiting, lpPick, lpSubmit, pruneSent, queueAcceptDefault, queueAnswer, sendToInbox, sentKey } from "./inbox.ts";
+import { deskAnswers, deskDone, itemNote, needAct, isWaiting, lpPick, lpSubmit, pruneSent, queueAcceptDefault, queueAnswer, sendToInbox, sentKey } from "./inbox.ts";
 import type { Remote } from "./remote.ts";
 
 const now = new Date("2026-10-28T20:00:00Z");
@@ -46,4 +46,10 @@ test("a card note is the exact item_note payload Bench validates", () => {
   assert.deepEqual(itemNote("abcdef0123", "  Asked 3 contractors  ", now, ID),
     { v: 1, id: ID, created: "2026-10-28T20:00:00.000Z", kind: "item_note", item: "abcdef0123", text: "Asked 3 contractors" });
   assert.equal((itemNote("abcdef0123", "x".repeat(2000), now, ID) as { text: string }).text.length, 1000);
+});
+
+test("a checklist choice carries exactly card, action and note", () => {
+  assert.deepEqual(needAct("abcdef0123", "deny", "  not now  ", now, ID),
+    { v: 1, id: ID, created: "2026-10-28T20:00:00.000Z", kind: "need_act", card: "abcdef0123", action: "deny", note: "not now" });
+  assert.equal((needAct("abcdef0123", "approve", "x".repeat(2000), now, ID) as { note: string }).note.length, 1000);
 });

@@ -92,7 +92,12 @@ const NeedsBlock = ({ n, now }: { n: Needs; now: number }) => (
       <div key={c.id} className="card need">
         <div className="t">{c.title}</div>
         <div className="meta"><span className="chip">{NEED_LABEL[c.kind] ?? c.kind}</span>{waitingLabel(c.since, now)}{c.due ? ` · due ${c.due}` : ""}</div>
-        {c.context ? <div className="meta">{c.context}</div> : null}
+        {c.more ? (
+          <details className="need-more">
+            <summary className="meta"><span className="need-short">{c.context || "More"}</span></summary>
+            <div className="meta">{c.more}</div>
+          </details>
+        ) : c.context ? <div className="meta">{c.context}</div> : null}
         {c.reply ? <div className="meta"><b>→</b> {c.reply}</div> : null}
       </div>
     ))}

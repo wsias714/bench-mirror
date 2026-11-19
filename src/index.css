@@ -135,3 +135,11 @@ button.wide { width: 100%; margin-top: 8px; text-align: center; }
 
 .pdf { width: 100%; height: 70vh; border: 1px solid var(--line); border-radius: 6px; margin-top: 8px; background: #fff; }
 .wide-link { display: block; min-height: 44px; line-height: 44px; text-align: center; }
+
+/* Needs you: a short line by default, the longer explanation on tap (Wade 2026-11-18) */
+.need-more > summary { cursor: pointer; list-style: none; display: flex; gap: 6px; align-items: baseline; }
+.need-more > summary::-webkit-details-marker { display: none; }
+.need-more > summary::after { content: "More ▸"; flex: none; opacity: .7; }
+.need-more[open] > summary::after { content: "Less ▾"; }
+.need-more .need-short { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.need-more[open] .need-short { white-space: normal; }

@@ -134,7 +134,7 @@ export function tabBadge(s: Pick<Snapshot, "threads" | "needs"> | null, tab: str
 export const NEED_LABEL: Record<string, string> = {
   thread_waiting: "Thread", close_pending: "Done, not closed", twm_decision: "TWM decision", twm_desk: "TWM desk",
   housekeeping_ok: "Housekeeping OK", approved_stuck: "Approved, not applied", feedback_go: "Feedback: your call",
-  feedback_ship: "Feedback: ship?", burn_plan: "Burn plan", deck: "Deck card",
+  feedback_ship: "Feedback: ship?", burn_plan: "Burn plan", deck: "Deck card", feedback_route: "Feedback route",
 };
 /** "waiting 10d" from the card's since date; "" for today/yesterday or an unreadable date. */
 export function waitingLabel(since: string, now = Date.now()): string {

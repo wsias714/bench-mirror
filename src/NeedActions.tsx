@@ -24,6 +24,13 @@ export default function NeedActions({ c, send, can }: { c: NeedCard; send: Sende
     <>
       {c.decided && <div className="meta warn">You chose “{c.decided.label}” on {c.decided.at}; it is still listed.</div>}
       {c.last_try && <div className="err">“{c.last_try.label}” did not go through ({c.last_try.at}): {c.last_try.message}</div>}
+      {c.held_back?.length ? (
+        <>
+          {/* Private text (Bench 2026-11-19): the buttons show, switched off, so the card is never just missing. */}
+          <div className="row">{c.held_back.map((l) => <button key={l} disabled>{l}</button>)}</div>
+          <div className="meta">{c.lock || "Open it on the desktop to decide."}</div>
+        </>
+      ) : null}
       {!acts.length ? null : waiting(key) ? <div className="meta">Sent. Bench applies it within 15 minutes.</div> : can ? (
         <>
           <div className="row">

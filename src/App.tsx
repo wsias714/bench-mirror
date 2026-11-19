@@ -87,7 +87,7 @@ const HkCard = ({ h }: { h: Housekeeping }) => (
 const Empty = ({ text }: { text: string }) => <div className="empty">{text}</div>;
 /** The morning's one list (same cards, same order as the email): what it is, why it waits, the one reply. Read-only. */
 const NeedCardRow = ({ c, now, reply }: { c: NeedCard; now: number; reply: boolean }) => (
-      <div className="card need">
+      <div className={`card need${c.private ? " private" : ""}`}>
         <div className="t">{c.title}</div>
         <div className="meta"><span className="chip">{NEED_LABEL[c.kind] ?? c.kind}</span>{waitingLabel(c.since, now)}{c.due ? ` · due ${c.due}` : ""}</div>
         {c.more ? (
@@ -96,10 +96,13 @@ const NeedCardRow = ({ c, now, reply }: { c: NeedCard; now: number; reply: boole
             <div className="meta">{c.more}</div>
           </details>
         ) : c.context ? <div className="meta">{c.context}</div> : null}
-        {reply && c.reply && !(c.actions ?? []).length ? <div className="meta"><b>→</b> {c.reply}</div> : null}
+        {c.command ? (
+          <div className="cmd-box"><div className="eyebrow">Command</div><code className="cmd">{c.command}</code>{c.cwd ? <div className="meta">in <code>{c.cwd}</code></div> : null}</div>
+        ) : null}
+        {reply && c.reply && !(c.actions ?? []).length && !c.held_back?.length ? <div className="meta"><b>→</b> {c.reply}</div> : null}
         <NeedActions c={c} send={sendAnswer} can={isConnected()} />
-        {/* notes on this card from the desk (read only here); the 05:15 pass reads them too */}
-        <CardNotes e={c} send={sendAnswer} can={isConnected()} />
+        {/* notes on this card from the desk (read only here); the morning pass reads them too. Not on a private card. */}
+        {c.private ? null : <CardNotes e={c} send={sendAnswer} can={isConnected()} />}
       </div>
 );
 /** His items on top; the system's own upkeep under one collapsed row, each kind's reply once (REVIEW-nav 2). */
@@ -117,7 +120,7 @@ const NeedsBlock = ({ n, now }: { n: Needs; now: number }) => {
           {upkeep.map((c) => <NeedCardRow key={c.id} c={c} now={now} reply={!groups.length} />)}
         </details>
       ) : null}
-      {!(n.items ?? []).length && !n.private ? <Empty text="Nothing waits on you." /> : null}
+      {!(n.items ?? []).length && !n.private && !n.more ? <Empty text="Nothing waits on you." /> : null}
       {n.decided?.length ? (
         <details className="need-upkeep">
           <summary className="meta"><b>Your recent choices ({n.decided.length})</b> · from the phone or the desk, last 7 days</summary>

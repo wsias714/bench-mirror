@@ -80,9 +80,11 @@ test("stateAsOf warns past two hours and on an unreadable stamp", () => {
 });
 
 import { decisionLine, needsSummary, todayMore, waitingLabel } from "./snapshot.ts";
-test("needs summary counts private cards in 'more', with no private tag (Wade 2026-11-18)", () => {
-  assert.equal(needsSummary({ available: true, count: 10, private: 1, more: 0, unreadable: 0 }), "10 waiting on you · 1 more in the email");
-  assert.equal(needsSummary({ available: true, count: 10, private: 2, more: 3 }), "10 waiting on you · 5 more in the email");
+test("needs summary counts the cards not shown, with no private tag (Wade 2026-11-18)", () => {
+  assert.equal(needsSummary({ available: true, count: 10, private: 1, more: 0, unreadable: 0 }), "10 waiting on you · 1 more on the desktop");
+  assert.equal(needsSummary({ available: true, count: 10, private: 2, more: 3 }), "10 waiting on you · 5 more on the desktop");
+  // every card is on the phone now: placeholders are cards, not "more"
+  assert.equal(needsSummary({ available: true, count: 4, private: 0, private_shown: 2, more: 0 }), "4 waiting on you");
   assert.doesNotMatch(needsSummary({ available: true, count: 4, private: 2 }), /private/);
   assert.equal(needsSummary({ available: true, count: 0 }), "0 waiting on you");
   assert.match(needsSummary({ available: true, count: 3, unreadable: 1 }), /unreadable, list may be short/);

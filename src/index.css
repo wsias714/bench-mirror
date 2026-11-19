@@ -147,3 +147,8 @@ button.wide { width: 100%; margin-top: 8px; text-align: center; }
 .need-upkeep { margin: 10px 0; padding-top: 6px; border-top: 1px solid rgba(127,127,127,.25); }
 .need-upkeep > summary { cursor: pointer; padding: 4px 0; }
 .meta.warn { color: var(--warn); }
+
+/* Needs: a held command (Bench 2026-11-19) and a private placeholder card */
+.cmd-box { margin-top: 6px; }
+.cmd { display: block; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 13px; white-space: pre-wrap; word-break: break-all; padding: 6px 8px; border-radius: 6px; background: var(--line); }
+.card.need.private > .t { font-style: italic; opacity: .8; }

@@ -164,6 +164,7 @@ export interface Snapshot {
   deck: Card[]; week: Ev[]; timeline?: Timeline; twm: Twm; homeschool?: Homeschool; state?: StateView;
   threads: { as_of: string; error: string; needs_you: number; items: Thread[]; pass?: PassRow[]; housekeeping?: Housekeeping | null };
   needs?: Needs;
+  your_feedback?: { available: boolean; items?: { app: string; text: string; state: string; sent: string }[]; hidden?: number };
   inbox: { dir: string; accepts: string[]; applied: string[] };
 }
 

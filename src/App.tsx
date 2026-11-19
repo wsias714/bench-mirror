@@ -273,13 +273,31 @@ export default function App() {
         ))}
       </nav>
       {snap ? <Body tab={tab} s={snap} now={now} /> : <Empty text={connected ? "Loading…" : "Open Settings to connect Dropbox."} />}
-      {sheet && <Settings onClose={() => setSheet(false)} onChange={() => { setConnected(isConnected()); void load(); }}
+      {sheet && <Settings fb={snap?.your_feedback} onClose={() => setSheet(false)} onChange={() => { setConnected(isConnected()); void load(); }}
         onForget={() => { setSnap(null); setConnected(false); setError(""); setSheet(false); }} />}
     </div>
   );
 }
 
-function Settings({ onClose, onChange, onForget }: { onClose: () => void; onChange: () => void; onForget: () => void }) {
+/** What happened to each Feedback tap, across his apps (Bench REVIEW-feedback-loop 3). Read only. */
+function YourFeedback({ fb }: { fb?: Snapshot["your_feedback"] }) {
+  if (!fb?.available) return null;
+  const items = fb.items ?? [];
+  return (
+    <details className="more">
+      <summary>Your feedback ({items.length})</summary>
+      {items.map((it, i) => (
+        <div className="card" key={i}>
+          <div className="meta"><span className="chip">{it.app}</span>{it.state} · sent {it.sent}</div>
+          <div>{it.text}</div>
+        </div>))}
+      {!items.length && <div className="meta">Nothing sent in the last 30 days.</div>}
+      {fb.hidden ? <div className="meta">{fb.hidden} more on the desktop</div> : null}
+    </details>
+  );
+}
+
+function Settings({ fb, onClose, onChange, onForget }: { fb?: Snapshot["your_feedback"]; onClose: () => void; onChange: () => void; onForget: () => void }) {
   const [key, setKey] = useState(getAppKey());
   const [code, setCode] = useState("");
   const [authUrl, setAuthUrl] = useState("");
@@ -308,6 +326,7 @@ function Settings({ onClose, onChange, onForget }: { onClose: () => void; onChan
       <div className="sheet" onClick={(e) => e.stopPropagation()}>
         <h2>Settings</h2>
         <button className="primary" onClick={openFeedback}>Send feedback</button>
+        <YourFeedback fb={fb} />
         <p className="note">This app reads one file Bench writes to your private Dropbox app folder. It can send TWM answers (queue decisions and the CEO desk) as new files in that folder's inbox; Bench checks and applies them. It can't change anything else.</p>
         <label className="field">Dropbox app key
           <input value={key} onChange={(e) => setKey(e.target.value)} autoCapitalize="off" autoCorrect="off" spellCheck={false} placeholder="from the Dropbox app console" />

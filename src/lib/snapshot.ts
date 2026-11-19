@@ -114,7 +114,7 @@ export interface StateView {
   system?: { color: StateColor; why: string; checks: { name: string; ok: boolean; detail: string }[] };
 }
 /** What waits on Wade (Bench src/needs.py): the same list the 06:00 email and `cos needs` show. Read-only. */
-export interface NeedCard { id: string; kind: string; title: string; context: string; reply: string; since: string; due: string; more?: string; tab?: string; group?: string }
+export interface NeedCard { id: string; kind: string; title: string; context: string; reply: string; since: string; due: string; more?: string; tab?: string; group?: string; notes?: number; noted?: string; note_list?: { at: string; by: string; text: string }[] }
 export interface Needs { available: boolean; generated?: string; count?: number; private?: number; more?: number; unreadable?: number; items?: NeedCard[]; by_tab?: Record<string, number>; upkeep?: UpkeepGroup[] }
 /** System upkeep (Bench REVIEW-nav proposal 2): per kind a count and the one shared reply. */
 export interface UpkeepGroup { kind: string; count: number; reply: string }

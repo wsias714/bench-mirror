@@ -19,7 +19,7 @@ import { openFeedback } from "./feedback.ts";
 import type { Payload } from "./lib/inbox.ts";
 
 type Tab = "today" | "deck" | "week" | "school" | "twm" | "threads" | "state";
-const TABS: [Tab, string][] = [["today", "Today"], ["state", "State"], ["deck", "Deck"], ["week", "Week"], ["school", "School"], ["twm", "TWM"], ["threads", "Threads"]];
+const TABS: [Tab, string][] = [["today", "Today"], ["state", "State"], ["deck", "Deck"], ["week", "Week"], ["school", "School"], ["twm", "TWM"], ["threads", "Projects"]];
 
 const readCached = (): Snapshot | null => {
   const t = loadCached();

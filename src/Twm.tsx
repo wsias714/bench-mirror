@@ -98,50 +98,50 @@ function TimelineView({ t }: { t?: Timeline12 }) {
 export default function TwmView({ t, send, can }: { t: Twm; send: Sender; can: boolean }) {
   if (!t.available) return <div className="empty">TWM data isn't available.</div>;
   const lr = t.last_run, f = t.failures, h = t.health, d = t.digest;
-  const waiting = (t.decisions_waiting?.length ?? 0) + (t.decisions_council?.length ?? 0);
-  const nextRun = t.next_run ? t.next_run.replace(/^\w+ \d{4}-/, "").replace(/ P[DS]T/, "").replace(/:00$/, "") : "?";
   return (
     <>
       <FeedbackCtx.Provider value={{ items: t.feedback ?? [], send, can }}>
-      {/* Your move first (Bench REVIEW-nav proposal 7, Wade 2026-11-18): what he acts on, then short status, then
-          every reading section collapsed so the page fits a couple of screens. */}
-      <h2>Your move</h2>
+      {t.night?.line && (
+        <div className="card">
+          <div className="t">TWM last night</div>
+          <div className={["failed", "stopped", "missed"].includes(t.night.level) ? "meta bad" : "meta"}>{t.night.line}</div>
+        </div>
+      )}
       <OnYourDesk d={t.actions} send={send} can={can} desk={t.desk} />
-      {t.desk?.available && !t.actions?.items?.some((a) => a.kind === "checkin" && a.set === t.desk?.id) && <DeskCard d={t.desk} send={send} can={can} />}
-      <div className="eyebrow">Decisions waiting on you{waiting ? ` (${waiting})` : ""}</div>
-      {t.decisions_waiting?.map((q) => <QueueCard key={q.id} q={q} send={send} can={can} />)}
-      {t.decisions_council?.map((q, i) => <div className="card" key={i}><div className="meta">{q}</div></div>)}
-      {!waiting && <div className="meta">No decisions waiting.</div>}
-
-      <h2>Now</h2>
+      <TwmBoard b={t.board} surfaces={t.surfaces} />
       <div className="card">
-        {t.night?.line && <div className={["failed", "stopped", "missed"].includes(t.night.level) ? "meta bad" : "meta"}><b>Last night:</b> {t.night.line}</div>}
         <div className="t">Weekly report: {t.weekly_verdict || "none in the latest digest"}</div>
         <div className="grid3">
           <div><b>{t.running ? "Running" : t.paused ? "Paused" : "Idle"}</b><span>state</span></div>
-          <div><b>{nextRun}</b><span>next run</span></div>
+          <div><b>{t.next_run ? t.next_run.replace(/^\w+ \d{4}-/, "").replace(/ P[DS]T/, "").replace(/:00$/, "") : "?"}</b><span>next run</span></div>
           <div><b>{f?.consecutive ?? "?"} / {f?.stop_after ?? "?"}</b><span>failures / stop</span></div>
         </div>
         {lr && <div className="meta">Last run {when(lr.ts)}: <span className={lr.ok ? "ok" : "bad"}>{lr.ok ? "ok" : "failed"}</span>{lr.moved != null ? `, ${lr.moved} moved` : ""}{lr.ended ? ` · ${lr.ended}` : ""}</div>}
         {t.paused && <div className="meta bad">Kill switch is on.</div>}
       </div>
 
-      <h2>More</h2>
-      <details className="more"><summary>What it did{d?.title ? ` · ${d.title.replace(/^TWM digest\s*/i, "")}` : ""}</summary>
-        {d?.notices?.map((n, i) => <p key={i} className="bad"><b>{n}</b></p>)}
-        <div className="card">
-          {d?.by_role && Object.keys(d.by_role).length
-            ? Object.entries(d.by_role).map(([role, rows]) => <div key={role}>{role !== "OTHER" && <div className="eyebrow">{role}</div>}<List items={rows} /></div>)
-            : <List items={d?.moved} />}
-          {!d?.moved?.length && !Object.keys(d?.by_role ?? {}).length && <div className="meta">Nothing moved.</div>}
-          {d?.next?.length ? <><div className="eyebrow">Next</div><List items={d.next} /></> : null}
-          {d?.health && <div className="meta"><b>Health:</b> {d.health}</div>}
-        </div>
-      </details>
-      <details className="more"><summary>Plan board</summary><TwmBoard b={t.board} surfaces={t.surfaces} /></details>
-      <details className="more"><summary>Delivery plan</summary><DeliveryView d={t.delivery} /></details>
-      <details className="more"><summary>12-month timeline</summary><TimelineView t={t.timeline} /></details>
-      {t.decisions_recent?.length ? <details className="more"><summary>Recently settled decisions ({t.decisions_recent.length})</summary>
+      <DeliveryView d={t.delivery} />
+      <TimelineView t={t.timeline} />
+      </FeedbackCtx.Provider>
+
+      <h2>What it did {d?.title ? `· ${d.title.replace(/^TWM digest\s*/i, "")}` : ""}</h2>
+      {d?.notices?.map((n, i) => <p key={i} className="bad"><b>{n}</b></p>)}
+      <div className="card">
+        {d?.by_role && Object.keys(d.by_role).length
+          ? Object.entries(d.by_role).map(([role, rows]) => <div key={role}>{role !== "OTHER" && <div className="eyebrow">{role}</div>}<List items={rows} /></div>)
+          : <List items={d?.moved} />}
+        {!d?.moved?.length && !Object.keys(d?.by_role ?? {}).length && <div className="meta">Nothing moved.</div>}
+        {d?.next?.length ? <><div className="eyebrow">Next</div><List items={d.next} /></> : null}
+        {d?.health && <div className="meta"><b>Health:</b> {d.health}</div>}
+      </div>
+
+      {t.desk?.available && !t.actions?.items?.some((a) => a.kind === "checkin" && a.set === t.desk?.id) && <DeskCard d={t.desk} send={send} can={can} />}
+
+      <h2>Decisions waiting on you</h2>
+      {t.decisions_waiting?.map((q) => <QueueCard key={q.id} q={q} send={send} can={can} />)}
+      {t.decisions_council?.map((q, i) => <div className="card" key={i}><div className="meta">{q}</div></div>)}
+      {!t.decisions_waiting?.length && !t.decisions_council?.length && <div className="empty">Nothing waiting on you.</div>}
+      {t.decisions_recent?.length ? <details className="more"><summary>Recently settled ({t.decisions_recent.length})</summary>
         {t.decisions_recent.slice().reverse().map((q) => (
           <div className="card" key={q.id}>
             <div className="t">{q.id} · {q.status}</div>
@@ -150,29 +150,33 @@ export default function TwmView({ t, send, can }: { t: Twm; send: Sender; can: b
             {q.answer ? <div className="meta"><b>Your answer:</b> {q.answer}</div> : null}
             {q.meaning ? <div className="meta"><i>{q.meaning}</i></div> : null}
           </div>))}</details> : null}
-      {t.plan && <details className="more"><summary>The plan{t.plan.updated ? ` · ${t.plan.updated}` : ""}</summary>
+
+      {t.plan && <>
+        <h2>The plan {t.plan.updated ? `· ${t.plan.updated}` : ""}</h2>
         <div className="card">
           {t.plan.goal && <div>{t.plan.goal}</div>}
           <div className="eyebrow">Where things stand</div>
           <List items={t.plan.standing} />
-        </div></details>}
-      {t.history?.length ? <details className="more"><summary>Overnight runs ({t.history.length})</summary>
+        </div></>}
+
+      {t.history?.length ? <>
+        <h2>Overnight runs</h2>
         {t.history.map((r) => (
           <div className="card" key={r.ts}>
             <div className="t">{when(r.ts)} <span className={r.ok ? "ok" : "bad"}>{r.ok ? "ok" : "failed"}</span></div>
             <div className="meta">{r.plan_only ? "plan only" : "full cycle"} · {r.moved ?? "?"} moved{r.mins != null ? ` · ${r.mins} min` : ""}{r.calls != null ? ` · ${r.calls} calls` : ""}{r.cost != null ? ` · $${r.cost.toFixed(2)} compute` : ""}</div>
             {r.ended && <div className="meta">{r.ended}</div>}
-          </div>))}</details> : null}
-      {h && Object.keys(h).length ? <details className="more"><summary>Build health</summary>
+          </div>))}</> : null}
+
+      {h && Object.keys(h).length ? <>
+        <h2>Build health</h2>
         <div className="card">
-          <div className="meta">Some probes are red on purpose: they track work TWM has not built yet. Red here is not an alarm.</div>
           <div className="t"><span className={h.green ? "ok" : "bad"}>{h.green ? "Gate green" : `Gate red${h.first_failure ? ` (${h.first_failure})` : ""}`}</span> · {h.tier} · {h.head}</div>
           <div className="meta">Phase {h.phase.current ?? "?"} of {h.phase.total ?? "?"}{h.phase.title ? ` — ${h.phase.title}` : ""}</div>
           <div className="meta">{h.probes_total != null ? `${h.probes_total - h.probes_red}/${h.probes_total} probes green` : ""}{h.pivots ? ` · ${h.pivots} open pivot` : ""} · gate run {h.at.replace("T", " ")}</div>
           {h.checks.length > 0 && <div className="checks">{h.checks.map((c) => <span key={c.id} className={`chip ${c.status === "pass" ? "ok" : c.status === "skip" ? "" : "bad"}`}>{c.id}</span>)}</div>}
           {h.unmerged.length > 0 && <><div className="eyebrow">Branches awaiting review</div>{h.unmerged.map((b, i) => <div className="meta" key={i}>◆ {b.headline} · {b.date}</div>)}</>}
-        </div></details> : null}
-      </FeedbackCtx.Provider>
+        </div></> : null}
     </>
   );
 }

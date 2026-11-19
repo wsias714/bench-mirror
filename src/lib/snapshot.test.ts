@@ -91,3 +91,15 @@ test("waiting label counts whole days from since", () => {
   assert.equal(waitingLabel("2026-11-18", now), "");
   assert.equal(waitingLabel("", now), "");
 });
+
+import { tabBadge } from "./snapshot.ts";
+test("tab badges come from the one Needs list, threads fall back to the thread count", () => {
+  const base = { threads: { as_of: "", error: "", needs_you: 4, items: [] } } as unknown as Parameters<typeof tabBadge>[0];
+  assert.equal(tabBadge({ ...base, needs: { available: true, by_tab: { today: 6, twm: 2, threads: 1 } } }, "twm"), 2);
+  assert.equal(tabBadge({ ...base, needs: { available: true, by_tab: { today: 6, twm: 2, threads: 1 } } }, "threads"), 1);
+  assert.equal(tabBadge({ ...base, needs: { available: true, by_tab: { today: 6 } } }, "deck"), 0);
+  assert.equal(tabBadge({ ...base, needs: { available: true, by_tab: { today: 6 } } }, "today"), 6);
+  assert.equal(tabBadge({ ...base, needs: { available: false } }, "threads"), 4);   // old snapshot: old badge
+  assert.equal(tabBadge({ ...base, needs: { available: false } }, "twm"), 0);
+  assert.equal(tabBadge(null, "twm"), 0);
+});

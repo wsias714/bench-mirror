@@ -114,8 +114,16 @@ export interface StateView {
   system?: { color: StateColor; why: string; checks: { name: string; ok: boolean; detail: string }[] };
 }
 /** What waits on Wade (Bench src/needs.py): the same list the 06:00 email and `cos needs` show. Read-only. */
-export interface NeedCard { id: string; kind: string; title: string; context: string; reply: string; since: string; due: string; more?: string }
-export interface Needs { available: boolean; generated?: string; count?: number; private?: number; more?: number; unreadable?: number; items?: NeedCard[] }
+export interface NeedCard { id: string; kind: string; title: string; context: string; reply: string; since: string; due: string; more?: string; tab?: string; group?: string }
+export interface Needs { available: boolean; generated?: string; count?: number; private?: number; more?: number; unreadable?: number; items?: NeedCard[]; by_tab?: Record<string, number> }
+/** Tab-bar badge from the one Needs list (Bench REVIEW-nav proposal 1): Today counts every card, other tabs the cards
+ * acted on there. An older snapshot without by_tab keeps the old Threads badge. */
+export function tabBadge(s: Pick<Snapshot, "threads" | "needs"> | null, tab: string): number {
+  if (!s) return 0;
+  const by = s.needs?.available ? s.needs.by_tab : undefined;
+  if (by) return by[tab] ?? 0;
+  return tab === "threads" ? s.threads?.needs_you ?? 0 : 0;
+}
 export const NEED_LABEL: Record<string, string> = {
   thread_waiting: "Thread", close_pending: "Done, not closed", twm_decision: "TWM decision", twm_desk: "TWM desk",
   housekeeping_ok: "Housekeeping OK", approved_stuck: "Approved, not applied", feedback_go: "Feedback: your call",

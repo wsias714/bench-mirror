@@ -6,7 +6,7 @@ import {
   isAuthError, isConnected, isScopeError, setAppKey, signOut, startAuth,
 } from "./lib/dropbox.ts";
 import { loadCached, saveCached } from "./lib/store.ts";
-import { agoLabel, ageMinutes, dueLabel, NEED_LABEL, needsSummary, parseSnapshot, pill, waitingLabel } from "./lib/snapshot.ts";
+import { agoLabel, ageMinutes, dueLabel, NEED_LABEL, needsSummary, parseSnapshot, pill, tabBadge, waitingLabel } from "./lib/snapshot.ts";
 import type { Card, Ev, Housekeeping, Needs, PassRow, Snapshot, Thread } from "./lib/snapshot.ts";
 import HomeschoolView from "./Homeschool.tsx";
 import TwmView from "./Twm.tsx";
@@ -221,7 +221,7 @@ export default function App() {
       <nav className="tabs" role="tablist">
         {TABS.map(([k, label]) => (
           <button key={k} role="tab" aria-selected={tab === k} className={tab === k ? "on" : ""} onClick={() => pick(k)}>
-            {label}{k === "threads" && snap && snap.threads.needs_you ? <sup>{snap.threads.needs_you}</sup> : null}
+            {label}{tabBadge(snap, k) ? <sup>{tabBadge(snap, k)}</sup> : null}
           </button>
         ))}
       </nav>

@@ -132,7 +132,7 @@ export function tabBadge(s: Pick<Snapshot, "threads" | "needs"> | null, tab: str
   return tab === "threads" ? s.threads?.needs_you ?? 0 : 0;
 }
 export const NEED_LABEL: Record<string, string> = {
-  thread_waiting: "Thread", close_pending: "Done, not closed", twm_decision: "TWM decision", twm_desk: "TWM desk",
+  thread_waiting: "Thread", project_ask: "Project step", close_pending: "Done, not closed", twm_decision: "TWM decision", twm_desk: "TWM desk",
   housekeeping_ok: "Housekeeping OK", approved_stuck: "Approved, not applied", feedback_go: "Feedback: your call",
   feedback_ship: "Feedback: ship?", burn_plan: "Burn plan", deck: "Deck card", feedback_route: "Feedback route",
 };

@@ -146,15 +146,21 @@ export function waitingLabel(since: string, now = Date.now()): string {
 /** The one summary line under the heading: count, private count, unreadable sources. */
 export function needsSummary(n: Needs): string {
   const bits = [`${n.count ?? 0} waiting on you`];
-  if (n.private) bits.push(`${n.private} private (in the email)`);
-  if (n.more) bits.push(`${n.more} more in the email`);
+  const more = (n.private ?? 0) + (n.more ?? 0);    // private cards are just "more": no private tag (Wade 2026-11-18)
+  if (more) bits.push(`${more} more in the email`);
   if (n.unreadable) bits.push(`${n.unreadable} source(s) unreadable, list may be short`);
   return bits.join(" · ");
 }
 
+/** Under Today's lists: what the phone leaves out (the rest past the cap, and private rows, never tagged). */
+export function todayMore(t: { more?: number; hidden?: number }): string {
+  const n = (t.more ?? 0) + (t.hidden ?? 0);
+  return n ? `${n} more on the desktop` : "";
+}
+
 export interface Snapshot {
   schema: number; generated_at: string; stale_after_min: number; read_only: boolean;
-  today: { counts: { overdue: number; upcoming: number; active: number }; top: Ev[]; outstanding: Ev[]; access?: string[] };
+  today: { counts: { overdue: number; upcoming: number; active: number }; top: Ev[]; outstanding: Ev[]; more?: number; hidden?: number; access?: string[] };
   deck: Card[]; week: Ev[]; timeline?: Timeline; twm: Twm; homeschool?: Homeschool; state?: StateView;
   threads: { as_of: string; error: string; needs_you: number; items: Thread[]; pass?: PassRow[]; housekeeping?: Housekeeping | null };
   needs?: Needs;

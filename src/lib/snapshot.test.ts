@@ -79,9 +79,11 @@ test("stateAsOf warns past two hours and on an unreadable stamp", () => {
   assert.equal(stateDue(null), "");
 });
 
-import { needsSummary, waitingLabel } from "./snapshot.ts";
-test("needs summary names private and unreadable counts", () => {
-  assert.equal(needsSummary({ available: true, count: 10, private: 1, more: 0, unreadable: 0 }), "10 waiting on you · 1 private (in the email)");
+import { needsSummary, todayMore, waitingLabel } from "./snapshot.ts";
+test("needs summary counts private cards in 'more', with no private tag (Wade 2026-11-18)", () => {
+  assert.equal(needsSummary({ available: true, count: 10, private: 1, more: 0, unreadable: 0 }), "10 waiting on you · 1 more in the email");
+  assert.equal(needsSummary({ available: true, count: 10, private: 2, more: 3 }), "10 waiting on you · 5 more in the email");
+  assert.doesNotMatch(needsSummary({ available: true, count: 4, private: 2 }), /private/);
   assert.equal(needsSummary({ available: true, count: 0 }), "0 waiting on you");
   assert.match(needsSummary({ available: true, count: 3, unreadable: 1 }), /unreadable, list may be short/);
 });
@@ -112,4 +114,10 @@ test("needs split into his items and system upkeep; an old snapshot is all life"
   assert.deepEqual(s.upkeep.map((c) => c.id), ["b"]);
   assert.equal(s.groups.length, 1);
   assert.deepEqual(splitNeeds({ available: true }), { life: [], upkeep: [], groups: [] });
+});
+
+test("Today's 'more on the desktop' line counts the rest and the private rows, untagged", () => {
+  assert.equal(todayMore({ more: 2, hidden: 3 }), "5 more on the desktop");
+  assert.equal(todayMore({}), "");
+  assert.equal(todayMore({ hidden: 1 }), "1 more on the desktop");
 });

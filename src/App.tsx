@@ -96,6 +96,9 @@ const NeedCardRow = ({ c, now, reply }: { c: NeedCard; now: number; reply: boole
           </details>
         ) : c.context ? <div className="meta">{c.context}</div> : null}
         {reply && c.reply ? <div className="meta"><b>→</b> {c.reply}</div> : null}
+        {/* notes on this card from the desk (read only here); the 05:15 pass reads them too */}
+        {(c.note_list ?? []).map((n, i) => (
+          <div className="fb-note answered" key={i}><span className="eyebrow">{n.at} · {n.by}</span> {n.text}</div>))}
       </div>
 );
 /** His items on top; the system's own upkeep under one collapsed row, each kind's reply once (REVIEW-nav 2). */

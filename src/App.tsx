@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { SNAPSHOT_PATH } from "./config.ts";
 import { resetApp } from "./Boundary.tsx";
 import {
@@ -6,6 +6,7 @@ import {
   isAuthError, isConnected, isScopeError, setAppKey, signOut, startAuth,
 } from "./lib/dropbox.ts";
 import { loadCached, saveCached } from "./lib/store.ts";
+import { startTab } from "./lib/tabs.ts";
 import { agoLabel, ageMinutes, dueLabel, NEED_LABEL, needsSummary, parseSnapshot, pill, splitNeeds, tabBadge, waitingLabel } from "./lib/snapshot.ts";
 import type { Card, Ev, Housekeeping, NeedCard, Needs, PassRow, Snapshot, Thread } from "./lib/snapshot.ts";
 import HomeschoolView from "./Homeschool.tsx";
@@ -168,9 +169,25 @@ function Body({ tab, s, now }: { tab: Tab; s: Snapshot; now: number }) {
   return <TwmView t={s.twm} send={sendAnswer} can={isConnected()} />;
 }
 
+const needsOf = (s: Snapshot | null): number | null => (s?.needs?.available ? s.needs.count ?? 0 : null);
+const lsNum = (k: string): number | null => {
+  try { const v = localStorage.getItem(k); const n = v == null || v === "" ? NaN : Number(v); return Number.isFinite(n) ? n : null; } catch { return null; }
+};
+const lsGet = (k: string): string | null => { try { return localStorage.getItem(k); } catch { return null; } };
+/** Open where the news is (Bench REVIEW-nav proposal 6): Today after an hour away or when Needs went up. */
+const openingTab = (needs: number | null): Tab => startTab({
+  tabs: TABS.map(([k]) => k), saved: lsGet("bm-tab"), leftAt: lsNum("bm-left"), seenNeeds: lsNum("bm-needs-seen"), needs, now: Date.now(),
+}) as Tab;
+
 export default function App() {
-  const [tab, setTab] = useState<Tab>(() => (TABS.find(([k]) => k === localStorage.getItem("bm-tab")) ?? TABS[0])[0]);
   const [snap, setSnap] = useState<Snapshot | null>(readCached);
+  const [tab, setTab] = useState<Tab>(() => openingTab(needsOf(snap)));
+  const snapRef = useRef(snap);
+  snapRef.current = snap;
+  // Armed by an open or a return to the app; only the load started after it may settle the tab, and only by moving
+  // to Today (never away from where he is), unless he picks a tab first.
+  const resuming = useRef(true);
+  const picked = useRef(false);
   const [fromCache, setFromCache] = useState(true);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
@@ -181,12 +198,15 @@ export default function App() {
   const load = useCallback(async () => {
     if (!isConnected()) return;
     setLoading(true);
+    const settle = resuming.current;
+    resuming.current = false;
     try {
       const f = await dropboxRemote().read(SNAPSHOT_PATH);
       if (!f) throw new Error("No snapshot.json in the app folder yet. Bench writes one every 15 minutes.");
       const parsed = parseSnapshot(f.text);
       saveCached(f.text);
       setSnap(parsed);
+      if (settle && !picked.current && openingTab(needsOf(parsed)) === TABS[0][0]) setTab(TABS[0][0]);
       setFromCache(false);
       setError("");
     } catch (e) {
@@ -207,7 +227,19 @@ export default function App() {
       }
       void load();
     })();
-    const onVis = () => { if (document.visibilityState === "visible") void load(); };
+    const onVis = () => {
+      if (document.visibilityState === "visible") {
+        resuming.current = true;
+        picked.current = false;
+        void load();
+      } else {
+        try {
+          localStorage.setItem("bm-left", String(Date.now()));
+          const n = needsOf(snapRef.current);
+          if (n != null) localStorage.setItem("bm-needs-seen", String(n));
+        } catch { /* ignore */ }
+      }
+    };
     document.addEventListener("visibilitychange", onVis);
     const tick = setInterval(() => setNow(Date.now()), 30000);
     const poll = setInterval(() => { if (document.visibilityState === "visible") void load(); }, 5 * 60000);
@@ -215,7 +247,7 @@ export default function App() {
   }, [load]);
 
   const p = pill({ connected, loading, error, snap, fromCache }, now);
-  const pick = (t: Tab) => { setTab(t); try { localStorage.setItem("bm-tab", t); } catch { /* ignore */ } };
+  const pick = (t: Tab) => { picked.current = true; setTab(t); try { localStorage.setItem("bm-tab", t); } catch { /* ignore */ } };
 
   return (
     <div className="app">

@@ -157,7 +157,7 @@ export const NEED_LABEL: Record<string, string> = {
   housekeeping_ok: "Housekeeping OK", approved_stuck: "Approved, not applied", feedback_go: "Feedback: your call",
   feedback_ship: "Feedback: ship?", burn_plan: "Burn plan", deck: "Deck card", feedback_route: "Feedback route",
   held_approval: "Permission held", mail: "Mail", job_failed: "Job not working", luna_finding: "Code review finding",
-  thread_finished: "Finished",
+  thread_finished: "Finished", bench_item: "Open matter", repeat_ask: "Asked again",
 };
 /** The card's age from its since date (Bench E1: every card shows its age): "new today", "since yesterday",
     "waiting 10d"; "" for an unreadable date. */

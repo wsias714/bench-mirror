@@ -126,17 +126,23 @@ export interface NeedCard {
   /** Private placeholder (Bench 2026-11-19): its text stays at the desk. held_back names the buttons not offered here,
       lock says why. A held command shows its command and folder (redacted and pii-guarded by Bench). */
   private?: boolean; held_back?: string[]; lock?: string; command?: string; cwd?: string;
+  /** A project page's steps for Wade, one line each (Bench 2026-11-19 evening: the card names every step). */
+  steps?: string[];
 }
 export interface NeedAction { do: "approve" | "deny"; label: string; effect: string }
 /** One of Wade's recent choices, from either screen, and whether it applied. */
 export interface Decision { title: string; label: string; by: string; at: string; ok: boolean; message: string }
-export interface Needs { available: boolean; generated?: string; count?: number; private?: number; private_shown?: number; more?: number; unreadable?: number; items?: NeedCard[]; by_tab?: Record<string, number>; upkeep?: UpkeepGroup[]; decided?: Decision[] }
+export interface Needs { available: boolean; generated?: string; count?: number; private?: number; private_shown?: number; more?: number; unreadable?: number; items?: NeedCard[]; by_tab?: Record<string, number>; upkeep?: UpkeepGroup[]; decided?: Decision[];
+  /** Cards that stay on the desktop only (NCPT patient data; Bench 2026-11-19 evening): a count, never a card. */
+  desk_only?: number }
 /** System upkeep (Bench REVIEW-nav proposal 2): per kind a count and the one shared reply. */
 export interface UpkeepGroup { kind: string; count: number; reply: string }
-/** His items first; the system's own upkeep collapsed below, each kind's reply said once. */
-export function splitNeeds(n: Needs): { life: NeedCard[]; upkeep: NeedCard[]; groups: UpkeepGroup[] } {
+/** His items first; the system's own upkeep collapsed below, each kind's reply said once; then threads that finished
+    and ask nothing (Bench 2026-11-19 evening: "Finishing isn't the same as needing Wade"), to check off once seen. */
+export function splitNeeds(n: Needs): { life: NeedCard[]; upkeep: NeedCard[]; groups: UpkeepGroup[]; finished: NeedCard[] } {
   const items = n.items ?? [];
-  return { life: items.filter((c) => c.group !== "upkeep"), upkeep: items.filter((c) => c.group === "upkeep"), groups: n.upkeep ?? [] };
+  return { life: items.filter((c) => c.group !== "upkeep" && c.group !== "finished"), upkeep: items.filter((c) => c.group === "upkeep"),
+    groups: n.upkeep ?? [], finished: items.filter((c) => c.group === "finished") };
 }
 /** Tab-bar badge from the one Needs list (Bench REVIEW-nav proposal 1): Today counts every card, other tabs the cards
  * acted on there. An older snapshot without by_tab keeps the old Threads badge. */
@@ -151,6 +157,7 @@ export const NEED_LABEL: Record<string, string> = {
   housekeeping_ok: "Housekeeping OK", approved_stuck: "Approved, not applied", feedback_go: "Feedback: your call",
   feedback_ship: "Feedback: ship?", burn_plan: "Burn plan", deck: "Deck card", feedback_route: "Feedback route",
   held_approval: "Permission held", mail: "Mail", job_failed: "Job not working", luna_finding: "Code review finding",
+  thread_finished: "Finished",
 };
 /** The card's age from its since date (Bench E1: every card shows its age): "new today", "since yesterday",
     "waiting 10d"; "" for an unreadable date. */
@@ -165,11 +172,13 @@ export function decisionLine(d: Decision): string {
   return `${d.label} · ${d.title} · ${d.ok ? "applied" : `did not apply: ${d.message}`}`;
 }
 /** The one summary line under the heading: count, cards past the cap, unreadable sources. Every card is on the phone
-    since 2026-11-19 (private ones as placeholders), so `private` is 0 from Bench; an older snapshot still counts it. */
+    with its own text since 2026-11-19 evening; one with patient data stays at the desk and is only counted
+    ("N items on desktop only"). An older snapshot's `private` count still reads "more on the desktop". */
 export function needsSummary(n: Needs): string {
   const bits = [`${n.count ?? 0} waiting on you`];
   const more = (n.private ?? 0) + (n.more ?? 0);
   if (more) bits.push(`${more} more on the desktop`);
+  if (n.desk_only) bits.push(`${n.desk_only} item${n.desk_only === 1 ? "" : "s"} on desktop only`);
   if (n.unreadable) bits.push(`${n.unreadable} source(s) unreadable, list may be short`);
   return bits.join(" · ");
 }

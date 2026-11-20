@@ -90,12 +90,13 @@ const NeedCardRow = ({ c, now, reply }: { c: NeedCard; now: number; reply: boole
       <div className={`card need${c.private ? " private" : ""}`}>
         <div className="t">{c.title}</div>
         <div className="meta"><span className="chip">{NEED_LABEL[c.kind] ?? c.kind}</span>{waitingLabel(c.since, now)}{c.due ? ` · due ${c.due}` : ""}</div>
+        {c.steps?.length ? <ol className="need-steps meta">{c.steps.map((s, i) => <li key={i}>{s}</li>)}</ol> : null}
         {c.more ? (
           <details className="need-more">
-            <summary className="meta"><span className="need-short">{c.context || "More"}</span></summary>
+            <summary className="meta"><span className="need-short">{c.steps?.length ? "" : c.context || ""}</span></summary>
             <div className="meta">{c.more}</div>
           </details>
-        ) : c.context ? <div className="meta">{c.context}</div> : null}
+        ) : c.context && !c.steps?.length ? <div className="meta">{c.context}</div> : null}
         {c.command ? (
           <div className="cmd-box"><div className="eyebrow">Command</div><code className="cmd">{c.command}</code>{c.cwd ? <div className="meta">in <code>{c.cwd}</code></div> : null}</div>
         ) : null}
@@ -107,7 +108,7 @@ const NeedCardRow = ({ c, now, reply }: { c: NeedCard; now: number; reply: boole
 );
 /** His items on top; the system's own upkeep under one collapsed row, each kind's reply once (REVIEW-nav 2). */
 const NeedsBlock = ({ n, now }: { n: Needs; now: number }) => {
-  const { life, upkeep, groups } = splitNeeds(n);
+  const { life, upkeep, groups, finished } = splitNeeds(n);
   return (
     <>
       <h2>Needs you</h2>
@@ -120,7 +121,13 @@ const NeedsBlock = ({ n, now }: { n: Needs; now: number }) => {
           {upkeep.map((c) => <NeedCardRow key={c.id} c={c} now={now} reply={!groups.length} />)}
         </details>
       ) : null}
-      {!(n.items ?? []).length && !n.private && !n.more ? <Empty text="Nothing waits on you." /> : null}
+      {finished.length ? (
+        <details className="need-upkeep">
+          <summary className="meta"><b>Finished ({finished.length})</b> · nothing needed; check off once seen</summary>
+          {finished.map((c) => <NeedCardRow key={c.id} c={c} now={now} reply={false} />)}
+        </details>
+      ) : null}
+      {!(n.items ?? []).length && !n.private && !n.more && !n.desk_only ? <Empty text="Nothing waits on you." /> : null}
       {n.decided?.length ? (
         <details className="need-upkeep">
           <summary className="meta"><b>Your recent choices ({n.decided.length})</b> · from the phone or the desk, last 7 days</summary>

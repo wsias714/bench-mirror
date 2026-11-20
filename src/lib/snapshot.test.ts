@@ -87,6 +87,9 @@ test("needs summary counts the cards not shown, with no private tag (Wade 2026-1
   assert.equal(needsSummary({ available: true, count: 4, private: 0, private_shown: 2, more: 0 }), "4 waiting on you");
   assert.doesNotMatch(needsSummary({ available: true, count: 4, private: 2 }), /private/);
   assert.equal(needsSummary({ available: true, count: 0 }), "0 waiting on you");
+  // Bench 2026-11-19 evening: no placeholders; patient-data cards are a count only
+  assert.equal(needsSummary({ available: true, count: 30, private: 0, desk_only: 1 }), "30 waiting on you · 1 item on desktop only");
+  assert.equal(needsSummary({ available: true, count: 30, desk_only: 2 }), "30 waiting on you · 2 items on desktop only");
   assert.match(needsSummary({ available: true, count: 3, unreadable: 1 }), /unreadable, list may be short/);
 });
 test("waiting label counts whole days from since", () => {
@@ -116,7 +119,9 @@ test("needs split into his items and system upkeep; an old snapshot is all life"
   assert.deepEqual(s.life.map((c) => c.id), ["a", "c"]);
   assert.deepEqual(s.upkeep.map((c) => c.id), ["b"]);
   assert.equal(s.groups.length, 1);
-  assert.deepEqual(splitNeeds({ available: true }), { life: [], upkeep: [], groups: [] });
+  assert.deepEqual(splitNeeds({ available: true }), { life: [], upkeep: [], groups: [], finished: [] });
+  const f = splitNeeds({ available: true, items: [it("a", "life"), it("d", "finished")] });
+  assert.deepEqual([f.life.map((c) => c.id), f.finished.map((c) => c.id)], [["a"], ["d"]]);
 });
 
 test("Today's 'more on the desktop' line counts the rest and the private rows, untagged", () => {

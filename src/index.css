@@ -141,8 +141,10 @@ button.wide { width: 100%; margin-top: 8px; text-align: center; }
 .need-more > summary::-webkit-details-marker { display: none; }
 .need-more > summary::after { content: "More ▸"; flex: none; opacity: .7; }
 .need-more[open] > summary::after { content: "Less ▾"; }
-.need-more .need-short { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.need-more[open] .need-short { white-space: normal; }
+.need-more .need-short { flex: 1; min-width: 0; overflow: hidden; display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 3; }
+.need-more[open] .need-short { display: block; }
+.need-steps { margin: 4px 0 2px; padding-left: 20px; }
+.need-steps li { margin: 2px 0; }
 
 .need-upkeep { margin: 10px 0; padding-top: 6px; border-top: 1px solid rgba(127,127,127,.25); }
 .need-upkeep > summary { cursor: pointer; padding: 4px 0; }

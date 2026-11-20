@@ -8,8 +8,6 @@ export interface PassRow { title: string; state: string; since: string; moved_on
 /** The briefing's numbered "Needs your OK" list: plain title, what it changes, the Chief of Staff's verdict word. Read-only. */
 export interface HkItem { n: number; title: string; change: string; verdict: string }
 export interface Housekeeping { day: string; items: HkItem[]; more: number; stale: number; fixed: number }
-export interface TlItem { id: string; title: string; domain: string; due: string; days: number | null; lead: number }
-export interface Timeline { days: number; ahead: TlItem[]; overdue: TlItem[]; overdue_total: number }
 export interface HistoryRow { ts: string; ok: boolean | null; moved: number | null; plan_only: boolean; ended: string; mins: number | null; calls: number | null; cost: number | null }
 export interface DeliveryRow { c0: string; c1: string; c2?: string; c3?: string; status: string; status_text: string }
 export interface Delivery {
@@ -199,7 +197,7 @@ export function todayMore(t: { more?: number; hidden?: number }): string {
 export interface Snapshot {
   schema: number; generated_at: string; stale_after_min: number; read_only: boolean;
   today: { counts: { overdue: number; upcoming: number; active: number }; top: Ev[]; outstanding: Ev[]; more?: number; hidden?: number; access?: string[] };
-  deck: Card[]; week: Ev[]; timeline?: Timeline; twm: Twm; homeschool?: Homeschool; state?: StateView;
+  deck: Card[]; week: Ev[]; twm: Twm; homeschool?: Homeschool; state?: StateView;
   threads: { as_of: string; error: string; needs_you: number; items: Thread[]; pass?: PassRow[]; housekeeping?: Housekeeping | null };
   needs?: Needs;
   your_feedback?: { available: boolean; items?: { app: string; text: string; state: string; sent: string }[]; hidden?: number };

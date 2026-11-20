@@ -7,7 +7,7 @@ import {
 } from "./lib/dropbox.ts";
 import { loadCached, saveCached } from "./lib/store.ts";
 import { startTab } from "./lib/tabs.ts";
-import { agoLabel, ageMinutes, decisionLine, dueLabel, NEED_LABEL, needsSummary, parseSnapshot, todayMore, pill, splitNeeds, tabBadge, waitingLabel } from "./lib/snapshot.ts";
+import { agoLabel, ageMinutes, decisionLine, dueLabel, NEED_LABEL, needChip, needsSummary, parseSnapshot, todayMore, pill, splitNeeds, tabBadge, waitingLabel } from "./lib/snapshot.ts";
 import type { Card, Ev, Housekeeping, NeedCard, Needs, PassRow, Snapshot, Thread } from "./lib/snapshot.ts";
 import HomeschoolView from "./Homeschool.tsx";
 import TwmView from "./Twm.tsx";
@@ -89,7 +89,7 @@ const Empty = ({ text }: { text: string }) => <div className="empty">{text}</div
 const NeedCardRow = ({ c, now, reply }: { c: NeedCard; now: number; reply: boolean }) => (
       <div className={`card need${c.private ? " private" : ""}`}>
         <div className="t">{c.title}</div>
-        <div className="meta"><span className="chip">{NEED_LABEL[c.kind] ?? c.kind}</span>{waitingLabel(c.since, now)}{c.due ? ` · due ${c.due}` : ""}</div>
+        <div className="meta"><span className="chip">{needChip(c)}</span>{[c.whose, c.due ? `due ${c.due}` : "", waitingLabel(c.since, now)].filter(Boolean).join(" · ")}</div>
         {c.steps?.length ? <ol className="need-steps meta">{c.steps.map((s, i) => <li key={i}>{s}</li>)}</ol> : null}
         {c.more ? (
           <details className="need-more">
@@ -117,7 +117,7 @@ const NeedsBlock = ({ n, now }: { n: Needs; now: number }) => {
       {upkeep.length ? (
         <details className="need-upkeep">
           <summary className="meta"><b>System upkeep ({upkeep.length})</b> · the machine's own housekeeping</summary>
-          {groups.map((g) => <div key={g.kind} className="meta"><span className="chip">{NEED_LABEL[g.kind] ?? g.kind}{g.count > 1 ? ` ×${g.count}` : ""}</span><b>→</b> {g.reply}</div>)}
+          {groups.map((g) => <div key={g.kind} className="meta"><span className="chip">{NEED_LABEL[g.kind] ?? "Item"}{g.count > 1 ? ` ×${g.count}` : ""}</span><b>→</b> {g.reply}</div>)}
           {upkeep.map((c) => <NeedCardRow key={c.id} c={c} now={now} reply={!groups.length} />)}
         </details>
       ) : null}

@@ -79,7 +79,7 @@ test("stateAsOf warns past two hours and on an unreadable stamp", () => {
   assert.equal(stateDue(null), "");
 });
 
-import { decisionLine, needsSummary, todayMore, waitingLabel } from "./snapshot.ts";
+import { decisionLine, needChip, needsSummary, todayMore, waitingLabel } from "./snapshot.ts";
 test("needs summary counts the cards not shown, with no private tag (Wade 2026-11-18)", () => {
   assert.equal(needsSummary({ available: true, count: 10, private: 1, more: 0, unreadable: 0 }), "10 waiting on you · 1 more on the desktop");
   assert.equal(needsSummary({ available: true, count: 10, private: 2, more: 3 }), "10 waiting on you · 5 more on the desktop");
@@ -133,4 +133,10 @@ test("Today's 'more on the desktop' line counts the rest and the private rows, u
 test("a recent choice says whether it applied, and why not", () => {
   assert.equal(decisionLine({ title: "Garden idea", label: "Build it", by: "phone", at: "2026-11-19T09:00", ok: true, message: "" }), "Build it · Garden idea · applied");
   assert.equal(decisionLine({ title: "Fix", label: "Approve", by: "desk", at: "", ok: false, message: "the file changed" }), "Approve · Fix · did not apply: the file changed");
+});
+
+test("a card's chip is Bench's tag in plain words, never a raw kind name (Bench 11-20)", () => {
+  assert.equal(needChip({ kind: "thread_waiting", label: "Task + Thread" }), "Task + Thread");
+  assert.equal(needChip({ kind: "bench_item" }), "Task");
+  assert.equal(needChip({ kind: "some_new_kind" }), "Item");
 });

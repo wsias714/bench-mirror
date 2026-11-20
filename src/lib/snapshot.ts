@@ -128,6 +128,9 @@ export interface NeedCard {
   private?: boolean; held_back?: string[]; lock?: string; command?: string; cwd?: string;
   /** A project page's steps for Wade, one line each (Bench 2026-11-19 evening: the card names every step). */
   steps?: string[];
+  /** The card's tag in Wade's words ("Task", "Thread", "Task + Thread" for one matter merged from several sources) and
+      whose matter it is ("AWT · 33 Fallingstar", "Personal · home"); both from Bench's fixed word lists (Bench 11-20). */
+  label?: string; whose?: string;
 }
 export interface NeedAction { do: "approve" | "deny"; label: string; effect: string }
 /** One of Wade's recent choices, from either screen, and whether it applied. */
@@ -156,9 +159,13 @@ export const NEED_LABEL: Record<string, string> = {
   thread_waiting: "Thread", project_ask: "Project step", close_pending: "Done, not closed", twm_decision: "TWM decision", twm_desk: "TWM desk",
   housekeeping_ok: "Housekeeping OK", approved_stuck: "Approved, not applied", feedback_go: "Feedback: your call",
   feedback_ship: "Feedback: ship?", burn_plan: "Burn plan", deck: "Deck card", feedback_route: "Feedback route",
-  held_approval: "Permission held", mail: "Mail", job_failed: "Job not working", luna_finding: "Code review finding",
-  thread_finished: "Finished", bench_item: "Open matter", repeat_ask: "Asked again",
+  held_approval: "Permission held", mail: "Email", job_failed: "Job not working", luna_finding: "Code review finding",
+  thread_finished: "Finished", bench_item: "Task", repeat_ask: "Asked again",
 };
+/** The chip on a card: Bench's own tag, else the kind's word, never a raw kind name (Wade 11-20 saw "bench_item"). */
+export function needChip(c: Pick<NeedCard, "kind" | "label">): string {
+  return c.label || NEED_LABEL[c.kind] || "Item";
+}
 /** The card's age from its since date (Bench E1: every card shows its age): "new today", "since yesterday",
     "waiting 10d"; "" for an unreadable date. */
 export function waitingLabel(since: string, now = Date.now()): string {

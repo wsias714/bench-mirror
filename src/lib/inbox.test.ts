@@ -53,3 +53,9 @@ test("a checklist choice carries exactly card, action and note", () => {
     { v: 1, id: ID, created: "2026-10-28T20:00:00.000Z", kind: "need_act", card: "abcdef0123", action: "deny", note: "not now", fp: "0123456789ab" });
   assert.equal((needAct("abcdef0123", "approve", "x".repeat(2000), "", now, ID) as { note: string }).note.length, 1000);
 });
+
+test("a TWM interview answer goes as action answer with the typed text as its note", () => {
+  const p = needAct("abcdef0123", "answer", "  Yes, hide it by default  ", "", now, ID) as { action: string; note: string };
+  assert.equal(p.action, "answer");
+  assert.equal(p.note, "Yes, hide it by default");
+});

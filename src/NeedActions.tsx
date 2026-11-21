@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { needAct, sentKey } from "./lib/inbox.ts";
-import type { NeedCard } from "./lib/snapshot.ts";
+import type { NeedCard, NeedDo } from "./lib/snapshot.ts";
 import { useDraft, useSent } from "./Answer.tsx";
 import type { Sender } from "./Answer.tsx";
 
@@ -14,7 +14,8 @@ export default function NeedActions({ c, send, can }: { c: NeedCard; send: Sende
   const [err, setErr] = useState("");
   const { waiting, mark } = useSent();
   const key = sentKey("d", "act", c.id);
-  const go = async (action: "approve" | "deny") => {
+  const typed = acts.some((a) => a.do === "answer");     // a TWM interview card: the box is the answer
+  const go = async (action: NeedDo) => {
     setBusy(true); setErr("");
     const m = await send(needAct(c.id, action, note, c.fp ?? ""));
     setBusy(false);
@@ -33,15 +34,16 @@ export default function NeedActions({ c, send, can }: { c: NeedCard; send: Sende
       ) : null}
       {!acts.length ? null : waiting(key) ? <div className="meta">Sent. Bench applies it within 15 minutes.</div> : can ? (
         <>
+          {typed && <textarea className="ans" rows={3} maxLength={1000} value={note} onChange={(ev) => setNote(ev.target.value)} placeholder="Your answer, then tap Answer" />}
           <div className="row">
             {acts.map((a) => (
-              <button key={a.do} className={a.do === "approve" ? "primary" : ""} disabled={busy} title={a.effect} onClick={() => void go(a.do)}>{a.label}</button>
+              <button key={a.do} className={a.do === "approve" ? "primary" : ""} disabled={busy || (a.do === "answer" && !note.trim())} title={a.effect} onClick={() => void go(a.do)}>{a.label}</button>
             ))}
           </div>
           <details className="need-more">
-            <summary className="meta">What these do · add a comment</summary>
+            <summary className="meta">{typed ? "What these do" : "What these do · add a comment"}</summary>
             {acts.map((a) => <div key={a.do} className="meta"><b>{a.label}:</b> {a.effect}</div>)}
-            <textarea className="ans" rows={2} maxLength={1000} value={note} onChange={(ev) => setNote(ev.target.value)} placeholder="Comment (optional, goes with your choice)" />
+            {!typed && <textarea className="ans" rows={2} maxLength={1000} value={note} onChange={(ev) => setNote(ev.target.value)} placeholder="Comment (optional, goes with your choice)" />}
           </details>
           {err && <div className="err">{err}</div>}
         </>

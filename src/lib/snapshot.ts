@@ -130,7 +130,9 @@ export interface NeedCard {
       whose matter it is ("AWT · 33 Fallingstar", "Personal · home"); both from Bench's fixed word lists (Bench 11-20). */
   label?: string; whose?: string;
 }
-export interface NeedAction { do: "approve" | "deny"; label: string; effect: string }
+/** "answer" (a TWM interview card, Bench 2026-11-20) sends the typed text as the answer, so it needs the box filled. */
+export type NeedDo = "approve" | "deny" | "answer";
+export interface NeedAction { do: NeedDo; label: string; effect: string }
 /** One of Wade's recent choices, from either screen, and whether it applied. */
 export interface Decision { title: string; label: string; by: string; at: string; ok: boolean; message: string }
 export interface Needs { available: boolean; generated?: string; count?: number; private?: number; private_shown?: number; more?: number; unreadable?: number; items?: NeedCard[]; by_tab?: Record<string, number>; upkeep?: UpkeepGroup[]; decided?: Decision[];
@@ -154,7 +156,7 @@ export function tabBadge(s: Pick<Snapshot, "threads" | "needs"> | null, tab: str
   return tab === "threads" ? s.threads?.needs_you ?? 0 : 0;
 }
 export const NEED_LABEL: Record<string, string> = {
-  thread_waiting: "Thread", project_ask: "Project step", close_pending: "Done, not closed", twm_decision: "TWM decision", twm_desk: "TWM desk",
+  thread_waiting: "Thread", project_ask: "Project step", close_pending: "Done, not closed", twm_decision: "TWM decision", twm_desk: "TWM desk", twm_interview: "TWM interview",
   housekeeping_ok: "Housekeeping OK", approved_stuck: "Approved, not applied", feedback_go: "Feedback: your call",
   feedback_ship: "Feedback: ship?", burn_plan: "Burn plan", deck: "Deck card", feedback_route: "Feedback route",
   held_approval: "Permission held", mail: "Email", job_failed: "Job not working", luna_finding: "Code review finding",

@@ -79,7 +79,7 @@ test("stateAsOf warns past two hours and on an unreadable stamp", () => {
   assert.equal(stateDue(null), "");
 });
 
-import { decisionLine, handledLine, needChip, needsSummary, todayMore, waitingLabel } from "./snapshot.ts";
+import { aheadLine, decisionLine, handledLine, needChip, needsSummary, todayMore, waitingLabel } from "./snapshot.ts";
 test("needs summary counts the cards not shown, with no private tag (Wade 2026-11-18)", () => {
   assert.equal(needsSummary({ available: true, count: 10, private: 1, more: 0, unreadable: 0 }), "10 waiting on you · 1 more on the desktop");
   assert.equal(needsSummary({ available: true, count: 10, private: 2, more: 3 }), "10 waiting on you · 5 more on the desktop");
@@ -145,4 +145,9 @@ test("a card's chip is Bench's tag in plain words, never a raw kind name (Bench 
 test("what the nightly loop handled reads as one line each", () => {
   assert.equal(handledLine({ what: "Closed", title: "Sample bill", at: "2026-11-24T04:05", undone: false, id: "r1" }), "Closed · Sample bill");
   assert.equal(handledLine({ what: "Moved", title: "Sample bill", at: "", undone: true, id: "r2" }), "Moved · Sample bill · undone");
+});
+
+test("what is about to slip reads as one line each", () => {
+  assert.equal(aheadLine({ why: "Due soon, nothing moving it", title: "Sample", when: "2026-11-24" }), "Due soon, nothing moving it · Sample · 11-24");
+  assert.equal(aheadLine({ why: "Two cards on one matter", title: "Sample", when: "" }), "Two cards on one matter · Sample");
 });

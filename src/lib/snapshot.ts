@@ -140,8 +140,10 @@ export interface NeedAction { do: NeedDo; label: string; effect: string }
 /** One of Wade's recent choices, from either screen, and whether it applied. */
 export interface Decision { title: string; label: string; by: string; at: string; ok: boolean; message: string }
 /** What the nightly loop did with his notes (Bench loop wave L3): Closed, Moved, Recorded, Passed on, Asked you. Read-only. */
+/** What is about to slip (Bench loop wave L4): a fixed phrase, the item's title and its due date. Read-only. */
+export interface Ahead { why: string; title: string; when: string }
 export interface Handled { what: string; title: string; at: string; undone: boolean; id: string }
-export interface Needs { available: boolean; generated?: string; count?: number; private?: number; private_shown?: number; more?: number; unreadable?: number; items?: NeedCard[]; /** TWM's weekly-interview cards, shown on the TWM tab (Bench 2026-11-21: one TWM card in Today). */ twm_items?: NeedCard[]; by_tab?: Record<string, number>; upkeep?: UpkeepGroup[]; decided?: Decision[]; handled?: Handled[];
+export interface Needs { available: boolean; generated?: string; count?: number; private?: number; private_shown?: number; more?: number; unreadable?: number; items?: NeedCard[]; /** TWM's weekly-interview cards, shown on the TWM tab (Bench 2026-11-21: one TWM card in Today). */ twm_items?: NeedCard[]; by_tab?: Record<string, number>; upkeep?: UpkeepGroup[]; decided?: Decision[]; handled?: Handled[]; ahead?: Ahead[];
   /** Cards that stay on the desktop only (NCPT patient data; Bench 2026-11-19 evening): a count, never a card. */
   desk_only?: number }
 /** System upkeep (Bench REVIEW-nav proposal 2): per kind a count and the one shared reply. */
@@ -183,6 +185,10 @@ export function waitingLabel(since: string, now = Date.now()): string {
 /** One line per recent choice: "Build it · Garden idea · applied" or "... · did not apply: reason". */
 export function decisionLine(d: Decision): string {
   return `${d.label} · ${d.title} · ${d.ok ? "applied" : `did not apply: ${d.message}`}`;
+}
+/** One line per item about to slip: "Due soon, nothing moving it · Renew permit · 11-24". */
+export function aheadLine(a: Ahead): string {
+  return `${a.why} · ${a.title}${a.when ? ` · ${a.when.slice(5)}` : ""}`;
 }
 /** One line per thing the loop did overnight: "Closed · Property Tax Installment 1", "· undone" when he reversed it. */
 export function handledLine(h: Handled): string {

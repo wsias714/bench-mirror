@@ -86,7 +86,7 @@ const HkCard = ({ h }: { h: Housekeeping }) => (
 );
 const Empty = ({ text }: { text: string }) => <div className="empty">{text}</div>;
 /** The morning's one list (same cards, same order as the email): what it is, why it waits, the one reply. Read-only. */
-const NeedCardRow = ({ c, now, reply }: { c: NeedCard; now: number; reply: boolean }) => (
+const NeedCardRow = ({ c, now, reply, go }: { c: NeedCard; now: number; reply: boolean; go?: (t: Tab) => void }) => (
       <div className={`card need${c.private ? " private" : ""}`}>
         <div className="t">{c.title}</div>
         <div className="meta"><span className="chip">{needChip(c)}</span>{[c.whose, c.due ? `due ${c.due}` : "", waitingLabel(c.since, now)].filter(Boolean).join(" · ")}</div>
@@ -101,19 +101,21 @@ const NeedCardRow = ({ c, now, reply }: { c: NeedCard; now: number; reply: boole
           <div className="cmd-box"><div className="eyebrow">Command</div><code className="cmd">{c.command}</code>{c.cwd ? <div className="meta">in <code>{c.cwd}</code></div> : null}</div>
         ) : null}
         {reply && c.reply && !(c.actions ?? []).length && !c.held_back?.length ? <div className="meta"><b>→</b> {c.reply}</div> : null}
+        {/* TWM is ONE card here (Bench 2026-11-21): a count, with the detail and the answers on the TWM tab. */}
+        {c.kind === "twm_summary" && go ? <div className="row"><button className="primary" onClick={() => go("twm")}>Open TWM</button></div> : null}
         <NeedActions c={c} send={sendAnswer} can={isConnected()} />
         {/* notes on this card from the desk (read only here); the morning pass reads them too. Not on a private card. */}
         {c.private ? null : <CardNotes e={c} send={sendAnswer} can={isConnected()} />}
       </div>
 );
 /** His items on top; the system's own upkeep under one collapsed row, each kind's reply once (REVIEW-nav 2). */
-const NeedsBlock = ({ n, now }: { n: Needs; now: number }) => {
+const NeedsBlock = ({ n, now, go }: { n: Needs; now: number; go?: (t: Tab) => void }) => {
   const { life, upkeep, groups, finished } = splitNeeds(n);
   return (
     <>
       <h2>Needs you</h2>
       <div className="stats">{needsSummary(n)}</div>
-      {life.map((c) => <NeedCardRow key={c.id} c={c} now={now} reply />)}
+      {life.map((c) => <NeedCardRow key={c.id} c={c} now={now} reply go={go} />)}
       {upkeep.length ? (
         <details className="need-upkeep">
           <summary className="meta"><b>System upkeep ({upkeep.length})</b> · the machine's own housekeeping</summary>
@@ -150,13 +152,13 @@ async function sendAnswer(p: Payload): Promise<string> {
   }
 }
 
-function Body({ tab, s, now }: { tab: Tab; s: Snapshot; now: number }) {
+function Body({ tab, s, now, go }: { tab: Tab; s: Snapshot; now: number; go: (t: Tab) => void }) {
   if (tab === "state") return <StateView s={s} now={now} />;
   if (tab === "today") {
     const c = s.today.counts;
     return (
       <>
-        {s.needs?.available ? <NeedsBlock n={s.needs} now={now} /> : null}
+        {s.needs?.available ? <NeedsBlock n={s.needs} now={now} go={go} /> : null}
         <div className="stats"><b>{c.overdue}</b> overdue · <b>{c.upcoming}</b> upcoming · {c.active} active</div>
         {s.today.access?.map((t) => <div key={t} className="stats">⚠ {t}</div>)}
         <h2>Top of the list</h2>
@@ -187,7 +189,8 @@ function Body({ tab, s, now }: { tab: Tab; s: Snapshot; now: number }) {
       </>
     );
   }
-  return <TwmView t={s.twm} send={sendAnswer} can={isConnected()} />;
+  return <TwmView t={s.twm} send={sendAnswer} can={isConnected()}
+    needs={(s.needs?.twm_items ?? []).map((c) => <NeedCardRow key={c.id} c={c} now={now} reply />)} />;
 }
 
 const needsOf = (s: Snapshot | null): number | null => (s?.needs?.available ? s.needs.count ?? 0 : null);
@@ -290,7 +293,7 @@ export default function App() {
           </button>
         ))}
       </nav>
-      {snap ? <Body tab={tab} s={snap} now={now} /> : <Empty text={connected ? "Loading…" : "Open Settings to connect Dropbox."} />}
+      {snap ? <Body tab={tab} s={snap} now={now} go={pick} /> : <Empty text={connected ? "Loading…" : "Open Settings to connect Dropbox."} />}
       {sheet && <Settings fb={snap?.your_feedback} onClose={() => setSheet(false)} onChange={() => { setConnected(isConnected()); void load(); }}
         onForget={() => { setSnap(null); setConnected(false); setError(""); setSheet(false); }} />}
     </div>

@@ -2,6 +2,7 @@ import { useState } from "react";
 import { agoLabel } from "./lib/snapshot.ts";
 import type { Homeschool, HsRecord, HsSubject, LpReport } from "./lib/snapshot.ts";
 import SubmitLpCard from "./SubmitLp.tsx";
+import MapWorksheets from "./MapWorksheets.tsx";
 import type { Sender } from "./Answer.tsx";
 import { PACE_TEXT, bar, hours, pace, syncState } from "./lib/homeschool.ts";
 
@@ -142,6 +143,8 @@ export default function HomeschoolView({ h, send, can }: { h?: Homeschool; send:
           <div className="meta">Drive listing {d.listing_age_min == null ? "age unknown" : agoLabel(d.listing_age_min)}. Unmatched files are waiting for a worksheet entry on the same day and subject.</div>
         </> : <div className="meta">Drive mapping isn't available.</div>}
       </div>
+
+      {h.attach?.items.length ? <MapWorksheets a={h.attach} send={send} can={can} /> : null}
 
       {h.submit && <SubmitLpCard s={h.submit} send={send} can={can} />}
 

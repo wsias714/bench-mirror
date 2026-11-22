@@ -87,8 +87,12 @@ export interface LpSubmit {
   checks: { label: string; ok: boolean }[];
   files: { samples: number; reports: number; already_there: number };
 }
+/** Unmatched worksheets and the entries each could map to (Bench src/hs_attach.py): opaque ids, no file or child names. */
+export interface HsAttachEntry { id: string; date: string; type: string; program: string; minutes: number; text: string; worksheet: boolean }
+export interface HsAttach { items: { id: string; subject: string; date: string; entries: HsAttachEntry[] }[]; more: number }
 export interface Homeschool {
   available: boolean;
+  attach?: HsAttach | null;
   lp?: { label: string; start: string; end: string; elapsed_days: number; total_days: number } | null;
   lp_subjects?: HsSubject[];
   work_samples?: { required: number; have: number; by_subject: { subject: string; n: number }[] };
@@ -135,7 +139,7 @@ export type NeedDo = "approve" | "deny" | "answer";
 export interface NeedAction { do: NeedDo; label: string; effect: string }
 /** One of Wade's recent choices, from either screen, and whether it applied. */
 export interface Decision { title: string; label: string; by: string; at: string; ok: boolean; message: string }
-export interface Needs { available: boolean; generated?: string; count?: number; private?: number; private_shown?: number; more?: number; unreadable?: number; items?: NeedCard[]; by_tab?: Record<string, number>; upkeep?: UpkeepGroup[]; decided?: Decision[];
+export interface Needs { available: boolean; generated?: string; count?: number; private?: number; private_shown?: number; more?: number; unreadable?: number; items?: NeedCard[]; /** TWM's weekly-interview cards, shown on the TWM tab (Bench 2026-11-21: one TWM card in Today). */ twm_items?: NeedCard[]; by_tab?: Record<string, number>; upkeep?: UpkeepGroup[]; decided?: Decision[];
   /** Cards that stay on the desktop only (NCPT patient data; Bench 2026-11-19 evening): a count, never a card. */
   desk_only?: number }
 /** System upkeep (Bench REVIEW-nav proposal 2): per kind a count and the one shared reply. */
@@ -156,7 +160,7 @@ export function tabBadge(s: Pick<Snapshot, "threads" | "needs"> | null, tab: str
   return tab === "threads" ? s.threads?.needs_you ?? 0 : 0;
 }
 export const NEED_LABEL: Record<string, string> = {
-  thread_waiting: "Thread", project_ask: "Project step", close_pending: "Done, not closed", twm_decision: "TWM decision", twm_desk: "TWM desk", twm_interview: "TWM interview",
+  thread_waiting: "Thread", project_ask: "Project step", close_pending: "Done, not closed", twm_decision: "TWM decision", twm_desk: "TWM desk", twm_interview: "TWM interview", twm_summary: "TWM",
   housekeeping_ok: "Housekeeping OK", approved_stuck: "Approved, not applied", feedback_go: "Feedback: your call",
   feedback_ship: "Feedback: ship?", burn_plan: "Burn plan", deck: "Deck card", feedback_route: "Feedback route",
   held_approval: "Permission held", mail: "Email", job_failed: "Job not working", luna_finding: "Code review finding",

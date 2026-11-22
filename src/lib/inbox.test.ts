@@ -1,6 +1,6 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { deskAnswers, deskDone, itemNote, needAct, isWaiting, lpPick, lpSubmit, pruneSent, queueAcceptDefault, queueAnswer, sendToInbox, sentKey } from "./inbox.ts";
+import { deskAnswers, deskDone, hsAttach, itemNote, needAct, isWaiting, lpPick, lpSubmit, pruneSent, queueAcceptDefault, queueAnswer, sendToInbox, sentKey } from "./inbox.ts";
 import type { Remote } from "./remote.ts";
 
 const now = new Date("2026-10-28T20:00:00Z");
@@ -58,4 +58,10 @@ test("a TWM interview answer goes as action answer with the typed text as its no
   const p = needAct("abcdef0123", "answer", "  Yes, hide it by default  ", "", now, ID) as { action: string; note: string };
   assert.equal(p.action, "answer");
   assert.equal(p.note, "Yes, hide it by default");
+});
+
+test("mapping a worksheet carries exactly the two opaque ids", () => {
+  assert.deepEqual(hsAttach("a1b2c3d4e5", "0123456789", now, ID),
+    { v: 1, id: ID, created: "2026-10-28T20:00:00.000Z", kind: "hs_attach", file: "a1b2c3d4e5", entry: "0123456789" });
+  assert.equal(sentKey("h", "a1b2c3d4e5"), "h:a1b2c3d4e5");
 });

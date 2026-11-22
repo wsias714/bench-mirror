@@ -12,6 +12,7 @@ export type Payload =
   | { v: 1; id: string; kind: "twm_feedback"; created: string; file: string; where: string; item: string; text: string }
   | { v: 1; id: string; kind: "lp_pick"; created: string; lp: string; key: string; picked: boolean }
   | { v: 1; id: string; kind: "lp_submit"; created: string; lp: string; plan_hash: string }
+  | { v: 1; id: string; kind: "hs_attach"; created: string; file: string; entry: string }
   | { v: 1; id: string; kind: "twm_desk"; created: string; set: string; answers: Record<string, { choice: string; note: string }> }
   | { v: 1; id: string; kind: "item_note"; created: string; item: string; text: string }
   | { v: 1; id: string; kind: "need_act"; created: string; card: string; action: "approve" | "deny" | "answer"; note: string; fp: string }
@@ -46,6 +47,10 @@ export const needAct = (card: string, action: "approve" | "deny" | "answer", not
 
 export const lpPick = (lp: string, key: string, picked: boolean, now = new Date(), id = uuid()): Payload =>
   ({ ...head(now, id), kind: "lp_pick", lp, key, picked });
+/** Map one unmatched worksheet to one entry (Bench feedback 0e82bbd8). Both are the opaque ids the snapshot showed;
+    Bench re-derives what it would offer and refuses any pairing that is not in that list. */
+export const hsAttach = (file: string, entry: string, now = new Date(), id = uuid()): Payload =>
+  ({ ...head(now, id), kind: "hs_attach", file, entry });
 export const lpSubmit = (lp: string, plan_hash: string, now = new Date(), id = uuid()): Payload =>
   ({ ...head(now, id), kind: "lp_submit", lp, plan_hash });
 
@@ -59,7 +64,7 @@ export async function sendToInbox(remote: Remote, p: Payload): Promise<string> {
 /** "Sent, waiting for Bench": remembered per item for a few hours, so a rejected answer can be tried again. */
 export const SENT_TTL_MS = 3 * 3600 * 1000;
 export type Sent = Record<string, number>;
-export const sentKey = (kind: "q" | "d" | "p" | "s", id: string, qid = "") => `${kind}:${id}${qid ? `:${qid}` : ""}`;
+export const sentKey = (kind: "q" | "d" | "p" | "s" | "h", id: string, qid = "") => `${kind}:${id}${qid ? `:${qid}` : ""}`;
 export const isWaiting = (sent: Sent, key: string, now = Date.now()) => now - (sent[key] ?? 0) < SENT_TTL_MS;
 export const pruneSent = (sent: Sent, now = Date.now()): Sent =>
   Object.fromEntries(Object.entries(sent).filter(([, t]) => now - t < SENT_TTL_MS));

@@ -1,3 +1,4 @@
+import type { ReactNode } from "react";
 import Comment, { FEEDBACK_FILES, FeedbackCtx } from "./Comment.tsx";
 import TwmBoard from "./TwmBoard.tsx";
 import OnYourDesk from "./OnYourDesk.tsx";
@@ -95,7 +96,7 @@ function TimelineView({ t }: { t?: Timeline12 }) {
 }
 
 /** The desktop TWM tab, phone-sized: what ran overnight, what moved, what is waiting, the plan, and build health. */
-export default function TwmView({ t, send, can }: { t: Twm; send: Sender; can: boolean }) {
+export default function TwmView({ t, send, can, needs }: { t: Twm; send: Sender; can: boolean; needs?: ReactNode[] }) {
   if (!t.available) return <div className="empty">TWM data isn't available.</div>;
   const lr = t.last_run, f = t.failures, h = t.health, d = t.digest;
   return (
@@ -107,6 +108,7 @@ export default function TwmView({ t, send, can }: { t: Twm; send: Sender; can: b
           <div className={["failed", "stopped", "missed"].includes(t.night.level) ? "meta bad" : "meta"}>{t.night.line}</div>
         </div>
       )}
+      {needs?.length ? <><h2>Weekly interview ({needs.length})</h2>{needs}</> : null}
       <OnYourDesk d={t.actions} send={send} can={can} desk={t.desk} />
       <TwmBoard b={t.board} surfaces={t.surfaces} />
       <div className="card">

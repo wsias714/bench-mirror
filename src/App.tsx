@@ -7,7 +7,7 @@ import {
 } from "./lib/dropbox.ts";
 import { loadCached, saveCached } from "./lib/store.ts";
 import { startTab } from "./lib/tabs.ts";
-import { agoLabel, ageMinutes, decisionLine, dueLabel, NEED_LABEL, needChip, needsSummary, parseSnapshot, todayMore, pill, splitNeeds, tabBadge, waitingLabel } from "./lib/snapshot.ts";
+import { agoLabel, ageMinutes, decisionLine, handledLine, dueLabel, NEED_LABEL, needChip, needsSummary, parseSnapshot, todayMore, pill, splitNeeds, tabBadge, waitingLabel } from "./lib/snapshot.ts";
 import type { Card, Ev, Housekeeping, NeedCard, Needs, PassRow, Snapshot, Thread } from "./lib/snapshot.ts";
 import HomeschoolView from "./Homeschool.tsx";
 import TwmView from "./Twm.tsx";
@@ -134,6 +134,12 @@ const NeedsBlock = ({ n, now, go }: { n: Needs; now: number; go?: (t: Tab) => vo
         <details className="need-upkeep">
           <summary className="meta"><b>Your recent choices ({n.decided.length})</b> · from the phone or the desk, last 7 days</summary>
           {n.decided.map((d, i) => <div key={i} className={d.ok ? "meta" : "err"}>{d.at.slice(5, 10)} · {d.by} · {decisionLine(d)}</div>)}
+        </details>
+      ) : null}
+      {n.handled?.length ? (
+        <details className="need-upkeep">
+          <summary className="meta"><b>Handled overnight ({n.handled.length})</b> · from your notes, last 3 days</summary>
+          {n.handled.map((h, i) => <div key={i} className="meta">{h.at.slice(5, 10)} · {handledLine(h)}</div>)}
         </details>
       ) : null}
     </>

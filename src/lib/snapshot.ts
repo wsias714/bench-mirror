@@ -139,7 +139,9 @@ export type NeedDo = "approve" | "deny" | "answer";
 export interface NeedAction { do: NeedDo; label: string; effect: string }
 /** One of Wade's recent choices, from either screen, and whether it applied. */
 export interface Decision { title: string; label: string; by: string; at: string; ok: boolean; message: string }
-export interface Needs { available: boolean; generated?: string; count?: number; private?: number; private_shown?: number; more?: number; unreadable?: number; items?: NeedCard[]; /** TWM's weekly-interview cards, shown on the TWM tab (Bench 2026-11-21: one TWM card in Today). */ twm_items?: NeedCard[]; by_tab?: Record<string, number>; upkeep?: UpkeepGroup[]; decided?: Decision[];
+/** What the nightly loop did with his notes (Bench loop wave L3): Closed, Moved, Recorded, Passed on, Asked you. Read-only. */
+export interface Handled { what: string; title: string; at: string; undone: boolean; id: string }
+export interface Needs { available: boolean; generated?: string; count?: number; private?: number; private_shown?: number; more?: number; unreadable?: number; items?: NeedCard[]; /** TWM's weekly-interview cards, shown on the TWM tab (Bench 2026-11-21: one TWM card in Today). */ twm_items?: NeedCard[]; by_tab?: Record<string, number>; upkeep?: UpkeepGroup[]; decided?: Decision[]; handled?: Handled[];
   /** Cards that stay on the desktop only (NCPT patient data; Bench 2026-11-19 evening): a count, never a card. */
   desk_only?: number }
 /** System upkeep (Bench REVIEW-nav proposal 2): per kind a count and the one shared reply. */
@@ -164,7 +166,7 @@ export const NEED_LABEL: Record<string, string> = {
   housekeeping_ok: "Housekeeping OK", approved_stuck: "Approved, not applied", feedback_go: "Feedback: your call",
   feedback_ship: "Feedback: ship?", burn_plan: "Burn plan", deck: "Deck card", feedback_route: "Feedback route",
   held_approval: "Permission held", mail: "Email", job_failed: "Job not working", luna_finding: "Code review finding",
-  thread_finished: "Finished", bench_item: "Task", repeat_ask: "Asked again", registry_held: "Held change",
+  thread_finished: "Finished", bench_item: "Task", repeat_ask: "Asked again", registry_held: "Held change", your_words: "Your note",
 };
 /** The chip on a card: Bench's own tag, else the kind's word, never a raw kind name (Wade 11-20 saw "bench_item"). */
 export function needChip(c: Pick<NeedCard, "kind" | "label">): string {
@@ -181,6 +183,10 @@ export function waitingLabel(since: string, now = Date.now()): string {
 /** One line per recent choice: "Build it · Garden idea · applied" or "... · did not apply: reason". */
 export function decisionLine(d: Decision): string {
   return `${d.label} · ${d.title} · ${d.ok ? "applied" : `did not apply: ${d.message}`}`;
+}
+/** One line per thing the loop did overnight: "Closed · Property Tax Installment 1", "· undone" when he reversed it. */
+export function handledLine(h: Handled): string {
+  return `${h.what} · ${h.title}${h.undone ? " · undone" : ""}`;
 }
 /** The one summary line under the heading: count, cards past the cap, unreadable sources. Every card is on the phone
     with its own text since 2026-11-19 evening; one with patient data stays at the desk and is only counted

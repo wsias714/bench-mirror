@@ -164,7 +164,7 @@ export const NEED_LABEL: Record<string, string> = {
   housekeeping_ok: "Housekeeping OK", approved_stuck: "Approved, not applied", feedback_go: "Feedback: your call",
   feedback_ship: "Feedback: ship?", burn_plan: "Burn plan", deck: "Deck card", feedback_route: "Feedback route",
   held_approval: "Permission held", mail: "Email", job_failed: "Job not working", luna_finding: "Code review finding",
-  thread_finished: "Finished", bench_item: "Task", repeat_ask: "Asked again",
+  thread_finished: "Finished", bench_item: "Task", repeat_ask: "Asked again", registry_held: "Held change",
 };
 /** The chip on a card: Bench's own tag, else the kind's word, never a raw kind name (Wade 11-20 saw "bench_item"). */
 export function needChip(c: Pick<NeedCard, "kind" | "label">): string {

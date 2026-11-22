@@ -139,4 +139,5 @@ test("a card's chip is Bench's tag in plain words, never a raw kind name (Bench 
   assert.equal(needChip({ kind: "thread_waiting", label: "Task + Thread" }), "Task + Thread");
   assert.equal(needChip({ kind: "bench_item" }), "Task");
   assert.equal(needChip({ kind: "some_new_kind" }), "Item");
+  assert.equal(needChip({ kind: "registry_held" }), "Held change"); // a held seed change: text only, its buttons are desk-only
 });

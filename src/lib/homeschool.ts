@@ -1,5 +1,5 @@
 /* Pure helpers for the School tab. No browser imports, so node --test runs them. */
-import type { HsSubject } from "./snapshot.ts";
+import type { HsMediaItem, HsSubject } from "./snapshot.ts";
 
 export type Pace = "ahead" | "on" | "behind" | "far";
 
@@ -30,4 +30,11 @@ export function syncState(s: { last_ingest_at: string | null; ok: boolean } | un
   const min = Math.max(0, Math.round((now - t) / 60000));
   if (!s.ok || min > 180) return { kind: "bad", min };
   return { kind: min > 75 ? "stale" : "ok", min };
+}
+
+/** Books and movies split by kind, each list newest worksheet first; an item with no worksheet date yet (still to do) goes first. */
+export function mediaGroups(items: HsMediaItem[] | null | undefined): { movies: HsMediaItem[]; books: HsMediaItem[] } {
+  const order = (a: HsMediaItem, b: HsMediaItem) => (a.date ? 1 : 0) - (b.date ? 1 : 0) || (b.date || "").localeCompare(a.date || "") || a.title.localeCompare(b.title);
+  const list = items ?? [];
+  return { movies: list.filter((i) => i.kind === "movie").sort(order), books: list.filter((i) => i.kind === "book").sort(order) };
 }

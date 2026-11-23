@@ -1,10 +1,10 @@
 import { useState } from "react";
 import { agoLabel } from "./lib/snapshot.ts";
-import type { Homeschool, HsRecord, HsSubject, LpReport } from "./lib/snapshot.ts";
+import type { Homeschool, HsMediaItem, HsRecord, HsSubject, LpReport } from "./lib/snapshot.ts";
 import SubmitLpCard from "./SubmitLp.tsx";
 import MapWorksheets from "./MapWorksheets.tsx";
 import type { Sender } from "./Answer.tsx";
-import { PACE_TEXT, bar, hours, pace, syncState } from "./lib/homeschool.ts";
+import { PACE_TEXT, bar, hours, mediaGroups, pace, syncState } from "./lib/homeschool.ts";
 
 const SHORT: Record<string, string> = { "Language Arts": "Lang. Arts", "Social Studies": "Soc. Studies", "Physical Education": "P.E.", "Social-Emotional": "Soc-Emo" };
 const short = (s: string) => SHORT[s] ?? s;
@@ -47,6 +47,23 @@ function Record({ r }: { r: HsRecord }) {
       </div>}
     </div>
   );
+}
+
+/** Every book and movie that has had a worksheet (Bench feedback 070d5afc). Read-only: Bench owns the list. */
+function MediaList({ items }: { items: HsMediaItem[] }) {
+  const g = mediaGroups(items);
+  const group = (label: string, rows: HsMediaItem[]) => rows.length ? (
+    <div key={label}>
+      <div className="t">{label} · {rows.length}</div>
+      {rows.map((m, i) => <div className="hs-rec-head" style={{ gridTemplateColumns: "44px 1fr" }} key={`${m.title}-${i}`}>
+        <span className="hs-rec-date">{m.date ? md(m.date) : "next"}</span>
+        <span>{m.title}{m.creator ? <span className="meta"> {m.creator}</span> : null}{m.note ? <span className="meta"> · {m.note}</span> : null}</span>
+      </div>)}
+    </div>) : null;
+  return <>
+    <h2>Books &amp; movies with a worksheet</h2>
+    <div className="card">{group("Movies", g.movies)}{group("Books", g.books)}</div>
+  </>;
 }
 
 const pct = (a: number, b: number) => (b ? Math.min(100, Math.round((100 * a) / b)) : 0);
@@ -147,6 +164,8 @@ export default function HomeschoolView({ h, send, can }: { h?: Homeschool; send:
       {h.attach?.items.length ? <MapWorksheets a={h.attach} send={send} can={can} /> : null}
 
       {h.submit && <SubmitLpCard s={h.submit} send={send} can={can} />}
+
+      {h.media?.length ? <MediaList items={h.media} /> : null}
 
       {h.lp_report && h.lp_report.students.length > 0 && <LpReportView r={h.lp_report} />}
 

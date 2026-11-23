@@ -90,8 +90,11 @@ export interface LpSubmit {
 /** Unmatched worksheets and the entries each could map to (Bench src/hs_attach.py): opaque ids, no file or child names. */
 export interface HsAttachEntry { id: string; date: string; type: string; program: string; minutes: number; text: string; worksheet: boolean }
 export interface HsAttach { items: { id: string; subject: string; date: string; entries: HsAttachEntry[] }[]; more: number }
+/** One book or movie that has (or is about to have) a worksheet. Bench's registry (config/homeschool_media.json); read-only here. */
+export interface HsMediaItem { kind: "book" | "movie"; title: string; creator: string; date: string; note: string }
 export interface Homeschool {
   available: boolean;
+  media?: HsMediaItem[] | null;
   attach?: HsAttach | null;
   lp?: { label: string; start: string; end: string; elapsed_days: number; total_days: number } | null;
   lp_subjects?: HsSubject[];

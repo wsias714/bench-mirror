@@ -148,6 +148,7 @@ const NeedsBlock = ({ n, now, go }: { n: Needs; now: number; go?: (t: Tab) => vo
           {n.handled.map((h, i) => <div key={i} className="meta">{h.at.slice(5, 10)} · {handledLine(h)}</div>)}
         </details>
       ) : null}
+      {n.levels_digest ? <div className="meta">{n.levels_digest}</div> : null}
     </>
   );
 };

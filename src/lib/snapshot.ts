@@ -146,7 +146,7 @@ export interface Decision { title: string; label: string; by: string; at: string
 /** What is about to slip (Bench loop wave L4): a fixed phrase, the item's title and its due date. Read-only. */
 export interface Ahead { why: string; title: string; when: string }
 export interface Handled { what: string; title: string; at: string; undone: boolean; id: string }
-export interface Needs { available: boolean; generated?: string; count?: number; private?: number; private_shown?: number; more?: number; unreadable?: number; items?: NeedCard[]; /** TWM's weekly-interview cards, shown on the TWM tab (Bench 2026-11-21: one TWM card in Today). */ twm_items?: NeedCard[]; by_tab?: Record<string, number>; upkeep?: UpkeepGroup[]; decided?: Decision[]; handled?: Handled[]; ahead?: Ahead[];
+export interface Needs { available: boolean; generated?: string; count?: number; private?: number; private_shown?: number; more?: number; unreadable?: number; items?: NeedCard[]; /** TWM's weekly-interview cards, shown on the TWM tab (Bench 2026-11-21: one TWM card in Today). */ twm_items?: NeedCard[]; by_tab?: Record<string, number>; upkeep?: UpkeepGroup[]; decided?: Decision[]; handled?: Handled[]; ahead?: Ahead[]; /** Code findings handled below Wade overnight: one line of counts (Bench decision levels wave 1, 11-24). */ levels_digest?: string;
   /** Cards that stay on the desktop only (NCPT patient data; Bench 2026-11-19 evening): a count, never a card. */
   desk_only?: number }
 /** System upkeep (Bench REVIEW-nav proposal 2): per kind a count and the one shared reply. */

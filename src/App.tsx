@@ -103,6 +103,7 @@ const NeedCardRow = ({ c, now, reply, go }: { c: NeedCard; now: number; reply: b
         {reply && c.reply && !(c.actions ?? []).length && !c.held_back?.length ? <div className="meta"><b>→</b> {c.reply}</div> : null}
         {/* TWM is ONE card here (Bench 2026-11-21): a count, with the detail and the answers on the TWM tab. */}
         {c.kind === "twm_summary" && go ? <div className="row"><button className="primary" onClick={() => go("twm")}>Open TWM</button></div> : null}
+        {c.link?.startsWith("https://claude.ai/code/") ? <div className="row"><a className="primary" href={c.link} target="_blank" rel="noopener noreferrer">Open the interview session</a></div> : null}
         <NeedActions c={c} send={sendAnswer} can={isConnected()} />
         {/* notes on this card from the desk (read only here); the morning pass reads them too. Not on a private card. */}
         {c.private ? null : <CardNotes e={c} send={sendAnswer} can={isConnected()} />}

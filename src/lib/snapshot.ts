@@ -121,6 +121,8 @@ export interface StateView {
 /** What waits on Wade (Bench src/needs.py): the same list the 06:00 email and `cos needs` show. Read-only. */
 export interface NeedCard {
   id: string; kind: string; title: string; context: string; reply: string; since: string; due: string; more?: string; tab?: string; group?: string;
+  /** Only the client interview card's own live session (https://claude.ai/code/...). Bench 2026-11-26. */
+  link?: string;
   notes?: number; noted?: string; note_list?: { at: string; by: string; text: string }[];
   /** The checklist's buttons (Bench src/needs_act.py): fixed label and what it does. */
   actions?: NeedAction[];
